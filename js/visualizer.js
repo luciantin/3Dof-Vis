@@ -45,7 +45,7 @@ function resizeCanvasToDisplaySize() {
 
 function animate() {
 
-    // resizeCanvasToDisplaySize();
+    //resizeCanvasToDisplaySize();
 
     requestAnimationFrame(animate);
     cube.rotation.x += 0.1;

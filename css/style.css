@@ -2,6 +2,10 @@ body{
     display: flex;
     height: 100vh;
     flex-direction: column;
+    
+    /* ++ sa ovim sam maknuo slider ++ */
+    overflow: hidden; 
+
 }
 
 #header-main{

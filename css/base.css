@@ -1,0 +1,157 @@
+/* 
+**  Napravio Tin ...
+**  
+*/
+
+/***** Import *****/
+
+@import url('https://fonts.googleapis.com/css?family=Quantico&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Monoton&display=swap');
+@import url('https://fonts.googleapis.com/css?family=VT323&display=swap');
+
+/***** Theme *****/
+
+:root {
+
+    --base-font-size: 10px;
+
+    --bg-color-dark: #333;
+    --bg-color-mid: #666;
+    --bg-color-light: #999;
+    --bg-color-primary: #009;
+    --bg-color-secondary: #900;
+    --bg-color-tertiary: #090;
+
+    --btn-color-bg: #444;
+    --btn-color-current: #999;
+    --btn-color-hover: #666;
+    
+    --txt-color-dark: #333;
+    --txt-color-mid: #666;
+    --txt-color-light: #fff;
+    --txt-color-primary: #900;
+    --txt-color-secondary: #090;
+    --txt-color-tertiary: #009;
+
+    --txt-font-primary: 'Quantico';
+    --txt-font-secondary: 'Times New Roman';
+    --txt-font-tertiary: 'Monoton';
+    --txt-font-editor: 'sans-serif';
+    --txt-font-editor-2: 'VT323';
+    --txt-font-special: 'Quantic';
+
+    --txt-font-size-Xlarge: 6rem;
+    --txt-font-size-large: 4rem;
+    --txt-font-size-medium: 2rem;
+    --txt-font-size-normal: 1.5rem;
+    --txt-font-size-small: 1rem;
+
+    }
+
+
+body, html{
+    font-family: 'Quantico', sans-serif, monospace;
+    font-size: var(--base-font-size);
+}
+
+/***** Reset *****/
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+a { text-decoration: none;}
+
+
+/***** Utility *****/
+
+/* Padding */
+
+.p-1{ padding: 1rem; }
+.p-2{ padding: 2rem; }
+.p-3{ padding: 3rem; }
+
+.py-1{ padding: 1rem 0; }
+.py-2{ padding: 2rem 0; }
+.py-3{ padding: 3rem 0; }
+
+.px-1{ padding: 0 1rem; }
+.px-2{ padding: 0 2rem; }
+.px-3{ padding: 0 3rem; }
+
+/* Margin */
+
+.m-1{ margin: 1rem; }
+.m-2{ margin: 2rem; }
+.m-3{ margin: 3rem; }
+
+.my-1{ margin: 1rem 0; }
+.my-2{ margin: 2rem 0; }
+.my-3{ margin: 3rem 0; }
+
+.mx-1{ margin: 0 1rem; }
+.mx-2{ margin: 0 2rem; }
+.mx-3{ margin: 0 3rem; }
+.mx-4{ margin: 0 4rem; }
+.mx-5{ margin: 0 5rem; }
+
+/* Background Color */
+
+.bg-dark{ background: var(--bg-color-dark);}
+.bg-mid{ background: var(--bg-color-mid);}
+.bg-light{ background: var(--bg-color-light);}
+.bg-primary{ background: var(--bg-color-primary);}
+.bg-secondary{ background: var(--bg-color-secondary);}
+.bg-tertiary{ background: var(--bg-color-tertiary);}
+
+
+/* Text Color */
+
+.txt-dark{ color: var(--txt-color-dark);}
+.txt-mid{ color: var(--txt-color-mid);}
+.txt-light{ color: var(--txt-color-light);}
+.txt-primary{ color: var(--txt-color-primary);}
+.txt-secondary{ color: var(--txt-color-secondary);}
+.txt-tertiary{ color: var(--txt-color-tertiary);}
+
+/* Text Font */
+
+.txt-font-primary{ font-family: var(--txt-font-primary);}
+.txt-font-secondary{ font-family: var(--txt-font-secondary);}
+.txt-font-tertiary{ font-family: var(--txt-font-tertiary);}
+.txt-font-editor{ font-family: var(--txt-font-editor);}
+.txt-font-editor-2{ font-family: var(--txt-font-editor-2);}
+.txt-font-special{ font-family: var(--txt-font-special);}
+
+/* Text Font Size */
+
+.txt-font-size-Xlarge{ font-size: var(--txt-font-size-Xlarge);}
+.txt-font-size-large{ font-size: var(--txt-font-size-large);}
+.txt-font-size-medium{ font-size: var(--txt-font-size-medium);}
+.txt-font-size-small{ font-size: var(--txt-font-size-small);}
+.txt-font-size-normal{ font-size: var(--txt-font-size-normal);}
+
+/* Container */
+
+.container-flex{ display: flex;}
+
+.container-center{ 
+    margin: auto; 
+    max-width: 70%;
+}
+
+
+/* Button */
+
+.btn{ 
+    background: var(--btn-color-bg);
+    border-radius: 10px;
+}
+.btn:hover{ 
+    background: var(--btn-color-hover);
+
+}
+.btn-current{ background: var(--btn-color-current);}
+

@@ -89,14 +89,6 @@ function init() {
     pointLight.position.set(0, 100, 90);
     scene.add(pointLight);
 
-    var plane = new THREE.Mesh(
-        new THREE.PlaneBufferGeometry( 10000, 10000 ),
-        new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.5, transparent: true } )
-    );
-    plane.position.y = 5;
-    plane.rotation.x = - Math.PI / 2;
-    scene.add( plane );
-
     // Get text from hash
 
     // var geometry = new THREE.BoxGeometry();

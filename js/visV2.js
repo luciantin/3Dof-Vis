@@ -93,19 +93,19 @@ function init() {
         new THREE.PlaneBufferGeometry( 10000, 10000 ),
         new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.5, transparent: true } )
     );
-    plane.position.y = 5;
+    plane.position.y = 0;
     plane.rotation.x = - Math.PI / 2;
     scene.add( plane );
 
     // Get text from hash
 
-    // var geometry = new THREE.BoxGeometry();
-    // var material = new THREE.MeshBasicMaterial({
-    //     color: 0xf0ff0f
-    // });
+    var geometry = new THREE.BoxGeometry(100,100,100);
+    var material = new THREE.MeshBasicMaterial({
+        color: 0xf0ff0f
+    });
     
-    // var cube = new THREE.Mesh(geometry, material);
-    // scene.add(cube);
+    var cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
 
 
     text = 'Bravo';
@@ -122,22 +122,25 @@ function init() {
     ];
 
     group = new THREE.Group();
-    group.position.y = 100;
+    group.position.y = 0;
 
     scene.add(group);
     
+
+    var plane2 = new THREE.Plane( new THREE.Vector3( 1, 1, 0.2 ), 3 );
+    var helper = new THREE.PlaneHelper( plane2, 1, 0xffff00 );
+    scene.add( helper );
+
     loadFont();
 
-     renderer = new THREE.WebGLRenderer({canvas: document.getElementById("Visualizer-O-Matic-9000")});
+    renderer = new THREE.WebGLRenderer({canvas: document.getElementById("Visualizer-O-Matic-9000")});
     const canvas = document.getElementById("Visualizer-O-Matic-9000");
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
-        // you must pass false here or three.js sadly fights the browser
-        renderer.setSize(width, height, false);
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
 
-    // container.appendChild(renderer.domElement);
+    renderer.setSize(width, height, false);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
 
 }
 
@@ -177,22 +180,13 @@ function createText() {
     textMesh1 = new THREE.Mesh(textGeo, materials);
     textMesh2 = new THREE.Mesh(textGeo, materials);
 
-    textMesh1.position.x = centerOffset;
-    textMesh1.position.y = hover;
-    textMesh1.position.z = -20;
+    textMesh1.position.x = 0;
+    textMesh1.position.y = 0;
+    textMesh1.position.z = 0;
     textMesh1.rotation.x = 0;
     textMesh1.rotation.y = 0;
 
     group.add(textMesh1);
-
-    // textMesh2.position.x = centerOffset+250;
-    // textMesh2.position.y = hover;
-    // textMesh2.position.z = 20;
-    // textMesh2.rotation.x = 0;
-    // textMesh2.rotation.y = 0;
-    
-    // group.add(textMesh2);
-
 
 }
 
@@ -201,18 +195,13 @@ function createText() {
 function animate() {
     requestAnimationFrame(animate);
 
-    render();
-}
-
-function render() {
-
-    // gdje ce kamera gledat TODO
     camera.lookAt(cameraTarget); 
 
-    renderer.clear();
+    // renderer.clear();
 
     renderer.render(scene, camera);
 }
+
 
 animate();
 

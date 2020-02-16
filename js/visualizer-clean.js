@@ -23,8 +23,45 @@ let vanillaProgTextMatrix = [
 
 ]
 
+let vanillaProgTextMatrix2 = [
+
+    [['1','2','3'],
+     ['4','5','6'],
+     ['7','8','9'],],
+
+    [['11','12','13'],
+     ['14','15','16'],
+     ['17','18','19'],],
+
+    [['NOP','NOP','NOP'],
+     ['NOP','NOP','NOP'],
+     ['NOP','NOP','NOP'],]
+
+]
+
+
+
 // Classes
 
+
+class instancedMeshMapMember {
+    constructor(value){
+        this.value = value;
+        this.counter = 0;
+        this.textMesh;
+    }
+
+    Init(){
+        this.textMesh = new THREE.InstancedMesh(makeTextGeo(CurrentFont,this.value),textMaterials[0],1);
+        scene.add(this.textMesh);
+    }
+
+    upCount(){ this.counter ++; }
+
+    dwCount(){ this.counter --; }
+}
+
+// base helper class for holding coordinates
 class CoordinateHolder {
     constructor(px = 0,py = 0,pz = 0,rx = 0,ry = 0){
         this.px = px;
@@ -35,6 +72,7 @@ class CoordinateHolder {
     }
 }
 
+// object type that LangReader returns when readCurrentCommand();
 class CommandHolder {
     constructor(value,px,py,pz){
         this.value = value;
@@ -44,10 +82,47 @@ class CommandHolder {
     }
 }
 
+//used to translate from coordinates to the index of InstancedMesh
+class MeshCommandHolder extends CoordinateHolder{
+    constructor(meshArrayIndex,value,px = 0,py = 0,pz = 0,rx = 0,ry = 0){
+        super(px,py,pz,rx,ry);
+        this.meshArrayIndex = meshArrayIndex;
+        this.value = value;
+    }
+}
+
+
+
 /////////////////////////
 
 // Object Literals
 
+
+// text to be displayed
+let TextDisplayMatrix = {
+        
+    
+    loadProgramText: function(progText){
+        this.content = new Array(progText.length); //make pages
+
+        for(let i = 0; i < progText.length; i++) {
+            this.content[i] = new Array(progText[i].length); //add rows to each page
+            //add elements to each row
+            for(let j = 0;j<progText[i].length;j++) this.content[i][j] = new Array(progText[i][j].length);
+        }   
+
+        //Copy elements 
+        for(let i = 0; i<this.content.length; i++) for(let j = 0; j<this.content[i].length; j++) for(let l = 0; l<this.content[i][j].length; l++) this.content[i][j][l] = progText[i][j][l];
+
+        //Fill content
+        // console.table(this.content); 
+    }
+
+    // commandTextToMeshHolder
+
+}
+
+// 3dof lang reader
 let LangReader = {
    
     //mozda, jednog dana
@@ -59,7 +134,7 @@ let LangReader = {
     //z - page , x - col , y - row
     progTextMatrixSize  : { x:0, y:0, z:0},  
     progTextMatrixStart : { x:0, y:0, z:0},  
-    progTextMatrixCrnt : { x:0, y:0, z:0},  
+    progTextMatrixCrnt  : { x:0, y:0, z:0},  
 
     //Load Program text from WebPage to progTextMatrix
     loadProgramText : function(){
@@ -75,7 +150,7 @@ let LangReader = {
         this.progTextMatrixStart.y = 0;
         this.progTextMatrixStart.z = 0;
 
-        progTextMatrixCrnt = progTextMatrixStart;
+        this.progTextMatrixCrnt = this.progTextMatrixStart;
         
         console.log('Load Prog Text : OK');
     },
@@ -93,7 +168,9 @@ let LangReader = {
 
 
     evalCommand : function(command){
-        if(command == 'NOP') ;
+        // if(command == 'NOP') ;
+
+        console.load('Current Command : '+command);
     },
 
 
@@ -101,6 +178,8 @@ let LangReader = {
 
     // }
 };
+
+
 
 let CurrentFont = {
     font: undefined, //Holds JSON font
@@ -119,6 +198,12 @@ let CurrentFont = {
 };
 
 
+// MAPzz
+
+let instancedMeshMap = new Map;
+
+
+
     /////////////////
     // Global Vars //
     /////////////////
@@ -128,9 +213,10 @@ let currentCoord = new CoordinateHolder();
 // Text Display Vars
 let centerCoord = new CoordinateHolder;
 let startCoord = new CoordinateHolder;
-let displayTextMatrix = [];
-let CAN_TEXT_MATRIX_BE_LOADED = false;
 
+//moze se ucitat tek kad se font ucita
+let CAN_TEXT_MATRIX_BE_LOADED = false;
+let SHOULD_TEXT_MATRIX_BE_LOADED = true;
 
 // Rendering Vars
 
@@ -168,7 +254,7 @@ scene.add(pointLight);
 /////////////////////////
 
 
-// Debugging Cube
+// bug Cube
 let tst_geometry = new THREE.BoxGeometry(20,20,20);
 let tst_material = new THREE.MeshBasicMaterial({ color: 0xf0ff0f });
 let tst_cube = new THREE.Mesh(tst_geometry, tst_material);
@@ -176,15 +262,27 @@ scene.add(tst_cube);
 /////////////////////////
 
 
-// Main Materials
+// Materials
 
-let materialB = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-let materialC = new THREE.MeshNormalMaterial();
- 
+let textMaterials = [
+    new THREE.MeshBasicMaterial( { color: 0x00ff00 } ),
+    new THREE.MeshNormalMaterial()
+]
 
-// Main Code Execution
-// START
+
+///////////////////////////
+///////////////////////////
+/// Main Code Execution ///
+///////////////////////////
+///////////////////////////
+
 loadFont(CurrentFont);
+
+LangReader.loadProgramText();
+// console.log(LangReader.readCurrentCommand());
+console.table(LangReader.progTextMatrix);
+
+TextDisplayMatrix.loadProgramText(LangReader.progTextMatrix);
 
 init();
 
@@ -192,9 +290,11 @@ init();
 // Looped
 animate();
 
-// END
-
-
+///////////////////////////
+///////////////////////////
+///        END          ///
+///////////////////////////
+///////////////////////////
 
 // Functions
 
@@ -213,10 +313,14 @@ function init(){
 function animate() {
 
     requestAnimationFrame(animate);
+
     camera.lookAt(cameraTarget); 
 
     // font se ucitao pa se inita text 
     if(CurrentFont.fontLoaded == true && CAN_TEXT_MATRIX_BE_LOADED == false) CAN_TEXT_MATRIX_BE_LOADED = true;
+    if(CAN_TEXT_MATRIX_BE_LOADED && SHOULD_TEXT_MATRIX_BE_LOADED){
+
+    }
 
     renderer.clear();
 
@@ -267,6 +371,7 @@ function loadFont(passedFontObject) {
 }
 
 
+//Old
 function makeTextMesh(FontObject,TextString,CoordinateObject,MaterialObject){
     
     //Create Geometry
@@ -303,3 +408,32 @@ function makeTextMesh(FontObject,TextString,CoordinateObject,MaterialObject){
     // scene.add(textMesh);
     return textMesh;
 }
+
+
+function makeTextGeo(FontObject,TextString){
+    
+    //Create Geometry
+    let textGeo = new THREE.TextGeometry(TextString, {
+
+        font: FontObject.font,
+
+        size: FontObject.size,
+        height: FontObject.height,
+        curveSegments: FontObject.curveSegments,
+
+        bevelThickness: FontObject.bevelThickness,
+        bevelSize: FontObject.bevelSize,
+        bevelEnabled: FontObject.bevelEnabled
+
+    });
+
+    //Smth
+    textGeo.computeBoundingBox();
+    textGeo.computeVertexNormals();
+
+    //
+    textGeo = new THREE.BufferGeometry().fromGeometry(textGeo);
+
+    return textGeo;
+}
+

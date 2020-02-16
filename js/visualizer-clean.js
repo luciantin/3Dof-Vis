@@ -4,22 +4,103 @@ import * as THREE from '../node_modules/three/build/three.module.js';
 import { GeometryUtils } from '../node_modules/three/examples/jsm/utils/GeometryUtils.js';
 
 
+// Bitno za nesto
 THREE.Cache.enabled = true;
 
+let vanillaProgTextMatrix = [
+
+    [['NOP','NOP','NOP'],
+     ['NOP','NOP','NOP'],
+     ['NOP','NOP','NOP'],],
+
+    [['NOP','NOP','NOP'],
+     ['NOP','NOP','NOP'],
+     ['NOP','NOP','NOP'],],
+
+    [['NOP','NOP','NOP'],
+     ['NOP','NOP','NOP'],
+     ['NOP','NOP','NOP'],]
+
+]
 
 // Classes
 
-function CoordinateHolder() {
-    this.positionx = 0;
-    this.positiony = 0;
-    this.positionz = 0;
-    this.rotationx = 0;
-    this.rotationy = 0;
-};
+class CoordinateHolder {
+    constructor(px = 0,py = 0,pz = 0,rx = 0,ry = 0){
+        this.px = px;
+        this.py = py;
+        this.pz = pz;
+        this.rx = rx;
+        this.ry = ry;
+    }
+}
+
+class CommandHolder {
+    constructor(value,px,py,pz){
+        this.value = value;
+        this.px = px;
+        this.py = py;
+        this.pz = pz;
+    }
+}
 
 /////////////////////////
 
 // Object Literals
+
+let LangReader = {
+   
+    //mozda, jednog dana
+    commandHistory : [],
+
+    // 3Dof Program text
+    progTextMatrix : [],
+
+    //z - page , x - col , y - row
+    progTextMatrixSize  : { x:0, y:0, z:0},  
+    progTextMatrixStart : { x:0, y:0, z:0},  
+    progTextMatrixCrnt : { x:0, y:0, z:0},  
+
+    //Load Program text from WebPage to progTextMatrix
+    loadProgramText : function(){
+
+        //TODO load prog text
+        this.progTextMatrix = vanillaProgTextMatrix;
+
+        this.progTextMatrixSize.x = 3;
+        this.progTextMatrixSize.y = 3;
+        this.progTextMatrixSize.z = 3;
+
+        this.progTextMatrixStart.x = 0;
+        this.progTextMatrixStart.y = 0;
+        this.progTextMatrixStart.z = 0;
+
+        progTextMatrixCrnt = progTextMatrixStart;
+        
+        console.log('Load Prog Text : OK');
+    },
+
+    //vrati kordinate trenutne naredbe
+    readCurrentCommand : function(){
+        let tmp_cmd = new CommandHolder(
+            this.progTextMatrix[this.progTextMatrixCrnt.z][this.progTextMatrixCrnt.y][this.progTextMatrixCrnt.x],
+            this.progTextMatrixCrnt.x,
+            this.progTextMatrixCrnt.y,
+            this.progTextMatrixCrnt.z
+        );
+        return tmp_cmd;
+    },
+
+
+    evalCommand : function(command){
+        if(command == 'NOP') ;
+    },
+
+
+    // nextCommand : function(){
+
+    // }
+};
 
 let CurrentFont = {
     font: undefined, //Holds JSON font
@@ -37,19 +118,34 @@ let CurrentFont = {
     fontMap: [ "helvetiker","optimer","gentilis","droid/droid_sans","droid/droid_serif"]
 };
 
-/////////////////////////
 
-// Global Vars
+    /////////////////
+    // Global Vars //
+    /////////////////
+// 
+let currentCoord = new CoordinateHolder();
 
-var group, textMesh1, textMesh2, textGeo, materials;
-var text = "NOP";
-let cameraTarget = new THREE.Vector3(0, 150, 0);
-var scene = new THREE.Scene();
+// Text Display Vars
+let centerCoord = new CoordinateHolder;
+let startCoord = new CoordinateHolder;
+let displayTextMatrix = [];
+let CAN_TEXT_MATRIX_BE_LOADED = false;
+
+
+// Rendering Vars
+
+let scene = new THREE.Scene();
+let renderer = new THREE.WebGLRenderer({canvas: document.getElementById("Visualizer-O-Matic-9000")});
 let camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1500);
-camera.position.set(0, 400, 700);
-var renderer = new THREE.WebGLRenderer({canvas: document.getElementById("Visualizer-O-Matic-9000")});
 
 /////////////////////////
+
+
+// CAMERA
+
+let cameraTarget = new THREE.Vector3(0, 150, 0);
+camera.position.set(0, 400, 700);
+
 
 // Scene Setup
 
@@ -61,11 +157,11 @@ scene.fog = new THREE.Fog(0x000000, 250, 1400);
 
 // LIGHTS
 
-var dirLight = new THREE.DirectionalLight(0xff0000, 0.125);
+let dirLight = new THREE.DirectionalLight(0xff0000, 0.125);
 dirLight.position.set(0, 0, 1).normalize();
 scene.add(dirLight);
 
-var pointLight = new THREE.PointLight(0xffffff, 1.5);
+let pointLight = new THREE.PointLight(0xffffff, 1.5);
 pointLight.position.set(0, 100, 90);
 scene.add(pointLight);
 
@@ -73,31 +169,18 @@ scene.add(pointLight);
 
 
 // Debugging Cube
-var tst_geometry = new THREE.BoxGeometry(20,20,20);
-var tst_material = new THREE.MeshBasicMaterial({ color: 0xf0ff0f });
-var tst_cube = new THREE.Mesh(tst_geometry, tst_material);
+let tst_geometry = new THREE.BoxGeometry(20,20,20);
+let tst_material = new THREE.MeshBasicMaterial({ color: 0xf0ff0f });
+let tst_cube = new THREE.Mesh(tst_geometry, tst_material);
 scene.add(tst_cube);
 /////////////////////////
 
 
-materials = [
-    new THREE.MeshPhongMaterial({
-        color: 0xf55fff,
-        flatShading: false
-    }), // front
-    new THREE.MeshPhongMaterial({
-        color: 0xf55ff5
-    }) // side
-];
+// Main Materials
 
-
-
-group = new THREE.Group();
-group.position.y = 0;
-scene.add(group);
-
-
-
+let materialB = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+let materialC = new THREE.MeshNormalMaterial();
+ 
 
 // Main Code Execution
 // START
@@ -106,21 +189,16 @@ loadFont(CurrentFont);
 init();
 
 
-
-
-// END
-
 // Looped
 animate();
 
+// END
 
 
 
 // Functions
 
 function init(){
-    
-
     const canvas = document.getElementById("Visualizer-O-Matic-9000");
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
@@ -134,25 +212,12 @@ function init(){
 
 function animate() {
 
-    // resizeCanvasToDisplaySize();
-    
-    // if(CurrentFont.fontLoaded == true){
-    //     CurrentFont.fontLoaded = false;
-    //     console.log(CurrentFont.font.data);
-    //     createText(CurrentFont,'asdasd');
-    //     // group.dispose();
-    //     cube.position.x = 2;
-    //     // scene.remove(cube);
-    // }
-
     requestAnimationFrame(animate);
     camera.lookAt(cameraTarget); 
 
-    cube.rotation.x += 0.1;
-    cube.rotation.y += 0.1;
+    // font se ucitao pa se inita text 
+    if(CurrentFont.fontLoaded == true && CAN_TEXT_MATRIX_BE_LOADED == false) CAN_TEXT_MATRIX_BE_LOADED = true;
 
-
-    // ????
     renderer.clear();
 
     renderer.render(scene, camera);
@@ -180,7 +245,7 @@ function resizeCanvasToDisplaySize() {
 
 //OK - ucita font , sam obi trebalo promijeniti font path ako treba
 function loadFont(passedFontObject) {
-    var loader = new THREE.FontLoader();
+    let loader = new THREE.FontLoader();
     loader.load('node_modules/three/examples/fonts/'
                  + passedFontObject.fontMap[passedFontObject.fontMapValue]
                  + '_' 
@@ -192,24 +257,20 @@ function loadFont(passedFontObject) {
     },// onProgress callback
 	function ( xhr ) {
         // console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
-        console.log('loaded');
+        console.log('Load Font : OK');
         CurrentFont.fontLoaded = true;
 	},
 	// onError callback
 	function ( err ) {
-		console.log( 'An error happened' );
+		console.log( 'Load Font : ERROR' );
     });
 }
 
 
-
-function makeTextMesh(FontObject,TextString,CoordinateObject,MaterialObject)
-
-
-
-function createText(FontObject,TextString) {
-
-    textGeo = new THREE.TextGeometry(TextString, {
+function makeTextMesh(FontObject,TextString,CoordinateObject,MaterialObject){
+    
+    //Create Geometry
+    let textGeo = new THREE.TextGeometry(TextString, {
 
         font: FontObject.font,
 
@@ -223,40 +284,22 @@ function createText(FontObject,TextString) {
 
     });
 
-    // textGeo.text = '1234';
+    //Smth
     textGeo.computeBoundingBox();
     textGeo.computeVertexNormals();
 
-    var centerOffset = -0.5 * (textGeo.boundingBox.max.x - textGeo.boundingBox.min.x);
-
+    //
     textGeo = new THREE.BufferGeometry().fromGeometry(textGeo);
-    textMesh1 = new THREE.Mesh(textGeo, materials);
 
-    textMesh2 = new THREE.Mesh(textGeo, materials);
+    let textMesh = new THREE.Mesh(textGeo, MaterialObject);
 
-    textMesh1.position.x = 0 ;
-    textMesh1.position.y = 0;
-    textMesh1.position.z = 0;
-    textMesh1.rotation.x = -Math.PI /2;
-    textMesh1.rotation.y = 0;
+    //
+    textMesh.position.x = CoordinateObject.px;
+    textMesh.position.y = CoordinateObject.py;
+    textMesh.position.z = CoordinateObject.pz;
+    textMesh.rotation.x = CoordinateObject.rx;
+    textMesh.rotation.y = CoordinateObject.ry;
 
-    group.add(textMesh1);
-}
-
-
-let flg = true;
-
-let butTaon = document.querySelector('.btn');
-
-butTaon.addEventListener('click',hideElement);
-
-function hideElement(){
-    console.log('Bravo');
-    if(flg) {
-        flg = false;
-        group.remove(textMesh1);}
-    else {
-        flg = true;
-        group.add(textMesh1);}
-
+    // scene.add(textMesh);
+    return textMesh;
 }

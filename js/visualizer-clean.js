@@ -43,7 +43,7 @@ let vanillaProgTextMatrix2 = [
 
 // Classes
 
-
+// elements of instancedMeshMap
 class instancedMeshMapMember {
     constructor(value){
         this.value = value;
@@ -52,13 +52,15 @@ class instancedMeshMapMember {
     }
 
     Init(){
-        this.textMesh = new THREE.InstancedMesh(makeTextGeo(CurrentFont,this.value),textMaterials[0],1);
+        this.textMesh = new THREE.InstancedMesh(makeTextGeo(CurrentFont,this.value),textMaterials[0],this.counter);
         scene.add(this.textMesh);
     }
 
     upCount(){ this.counter ++; }
 
     dwCount(){ this.counter --; }
+
+    getCount(){ return this.counter }
 }
 
 // base helper class for holding coordinates
@@ -82,7 +84,7 @@ class CommandHolder {
     }
 }
 
-//used to translate from coordinates to the index of InstancedMesh
+//used to translate from coordinates to the index of InstancedMesh Inside of instancedMeshMap Map
 class MeshCommandHolder extends CoordinateHolder{
     constructor(meshArrayIndex,value,px = 0,py = 0,pz = 0,rx = 0,ry = 0){
         super(px,py,pz,rx,ry);
@@ -112,13 +114,37 @@ let TextDisplayMatrix = {
         }   
 
         //Copy elements 
-        for(let i = 0; i<this.content.length; i++) for(let j = 0; j<this.content[i].length; j++) for(let l = 0; l<this.content[i][j].length; l++) this.content[i][j][l] = progText[i][j][l];
+        for(let i = 0; i<this.content.length; i++) for(let j = 0; j<this.content[i].length; j++) for(let l = 0; l<this.content[i][j].length; l++) this.content[i][j][l] = this.commandTextToMeshHolder(progText[i][j][l],i,j,l);
 
         //Fill content
-        // console.table(this.content); 
-    }
+        console.table(this.content); 
+    },
 
-    // commandTextToMeshHolder
+    commandTextToMeshHolder: function(value,x,y,z){
+        
+        let count;
+
+        //Add to Instance Map || if exists then incr cntr
+        if(instancedMeshMap.has(value)) instancedMeshMap.get(value).upCount();
+        else {
+            let tmp_MeshMapMmbr = new instancedMeshMapMember(value);
+            instancedMeshMap.set(value,tmp_MeshMapMmbr);
+            instancedMeshMap.get(value).upCount();
+        }
+
+        //get index in 
+        count = instancedMeshMap.get(value).getCount();
+
+        //Create And Return CommandHolder
+        let tmp_MCH = new MeshCommandHolder(
+            count,
+            value,
+            0,0,0,
+            0,0
+        );
+
+        return tmp_MCH;
+    }
 
 }
 
@@ -282,7 +308,14 @@ LangReader.loadProgramText();
 // console.log(LangReader.readCurrentCommand());
 console.table(LangReader.progTextMatrix);
 
+
+
 TextDisplayMatrix.loadProgramText(LangReader.progTextMatrix);
+
+
+console.table(instancedMeshMap);
+
+
 
 init();
 

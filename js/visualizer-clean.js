@@ -352,7 +352,35 @@ function animate() {
     // font se ucitao pa se inita text 
     if(CurrentFont.fontLoaded == true && CAN_TEXT_MATRIX_BE_LOADED == false) CAN_TEXT_MATRIX_BE_LOADED = true;
     if(CAN_TEXT_MATRIX_BE_LOADED && SHOULD_TEXT_MATRIX_BE_LOADED){
+        SHOULD_TEXT_MATRIX_BE_LOADED = false;
+        let textMesh = new THREE.InstancedMesh(makeTextGeo(CurrentFont,'this.value'),textMaterials[0],10);
+        var dummy = new THREE.Object3D();
 
+        for ( var i = 0; i < 10; i ++ ) {
+        
+            dummy.position.set(
+                Math.random() * 20 - 10,
+                Math.random() * 20 - 10,
+                Math.random() * 20 - 10
+            );
+        
+            dummy.rotation.set(
+                Math.random() * Math.PI,
+                Math.random() * Math.PI,
+                Math.random() * Math.PI
+            );
+        
+            dummy.updateMatrix();
+        
+            textMesh.setMatrixAt( i, dummy.matrix );
+        
+        }
+        textMesh.position.x = 5;
+        textMesh.position.y = 5;
+
+        scene.add(textMesh);
+
+        console.log('wdwdwd');
     }
 
     renderer.clear();

@@ -3,17 +3,26 @@
 import * as THREE from '../node_modules/three/build/three.module.js';
 import { GeometryUtils } from '../node_modules/three/examples/jsm/utils/GeometryUtils.js';
 
-// textMesh1; 
 
 THREE.Cache.enabled = true;
 
 
-let cameraTarget = new THREE.Vector3(0, 150, 0);
+// Classes
 
-// Fontzz
+function CoordinateHolder() {
+    this.positionx = 0;
+    this.positiony = 0;
+    this.positionz = 0;
+    this.rotationx = 0;
+    this.rotationy = 0;
+};
+
+/////////////////////////
+
+// Object Literals
 
 let CurrentFont = {
-    font: undefined,
+    font: undefined, //Holds JSON font
     height: 20,
     size: 70,
     hover: 30,
@@ -28,41 +37,47 @@ let CurrentFont = {
     fontMap: [ "helvetiker","optimer","gentilis","droid/droid_sans","droid/droid_serif"]
 };
 
+/////////////////////////
+
 // Global Vars
-var group, textMesh1, textMesh2, textGeo, materials,materials2;
 
+var group, textMesh1, textMesh2, textGeo, materials;
 var text = "NOP";
-
-
-
-// let currentFont ;
-
+let cameraTarget = new THREE.Vector3(0, 150, 0);
 var scene = new THREE.Scene();
-// var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 let camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1500);
-    camera.position.set(0, 400, 700);
+camera.position.set(0, 400, 700);
 var renderer = new THREE.WebGLRenderer({canvas: document.getElementById("Visualizer-O-Matic-9000")});
 
+/////////////////////////
+
+// Scene Setup
 
 scene.background = new THREE.Color(0x000000);
-    scene.fog = new THREE.Fog(0x000000, 250, 1400);
+scene.fog = new THREE.Fog(0x000000, 250, 1400);
 
-    // LIGHTS
-
-    var dirLight = new THREE.DirectionalLight(0xff0000, 0.125);
-    dirLight.position.set(0, 0, 1).normalize();
-    scene.add(dirLight);
-
-    var pointLight = new THREE.PointLight(0xffffff, 1.5);
-    pointLight.position.set(0, 100, 90);
-    scene.add(pointLight);
+/////////////////////////
 
 
-var geometry = new THREE.BoxGeometry(20,20,20);
-var material = new THREE.MeshBasicMaterial({
-    color: 0xf0ff0f
-});
+// LIGHTS
 
+var dirLight = new THREE.DirectionalLight(0xff0000, 0.125);
+dirLight.position.set(0, 0, 1).normalize();
+scene.add(dirLight);
+
+var pointLight = new THREE.PointLight(0xffffff, 1.5);
+pointLight.position.set(0, 100, 90);
+scene.add(pointLight);
+
+/////////////////////////
+
+
+// Debugging Cube
+var tst_geometry = new THREE.BoxGeometry(20,20,20);
+var tst_material = new THREE.MeshBasicMaterial({ color: 0xf0ff0f });
+var tst_cube = new THREE.Mesh(tst_geometry, tst_material);
+scene.add(tst_cube);
+/////////////////////////
 
 
 materials = [
@@ -75,51 +90,44 @@ materials = [
     }) // side
 ];
 
-materials2 = [
-    new THREE.MeshPhongMaterial({
-        color: 0x0000ff,
-        flatShading: false
-    }), // front
-    new THREE.MeshPhongMaterial({
-        color: 0xf55ff5
-    }) // side
-];
 
-var cube = new THREE.Mesh(geometry, material);
 
 group = new THREE.Group();
 group.position.y = 0;
 scene.add(group);
 
 
+
+
+// Main Code Execution
 // START
 loadFont(CurrentFont);
 
 init();
 
 
-// console.log(loadFont());
+
+
+// END
+
+// Looped
 animate();
 
-// console.log(cfnt);
-// END
 
 
 
 // Functions
 
 function init(){
-    scene.add(cube);
-
-    camera.position.z = 4; 
+    
 
     const canvas = document.getElementById("Visualizer-O-Matic-9000");
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
-        // you must pass false here or three.js sadly fights the browser
-        renderer.setSize(width, height, false);
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
+    // you must pass false here or three.js sadly fights the browser
+    renderer.setSize(width, height, false);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
 }
 
 
@@ -128,14 +136,14 @@ function animate() {
 
     // resizeCanvasToDisplaySize();
     
-    if(CurrentFont.fontLoaded == true){
-        CurrentFont.fontLoaded = false;
-        console.log(CurrentFont.font.data);
-        createText(CurrentFont,'asdasd');
-        // group.dispose();
-        cube.position.x = 2;
-        // scene.remove(cube);
-    }
+    // if(CurrentFont.fontLoaded == true){
+    //     CurrentFont.fontLoaded = false;
+    //     console.log(CurrentFont.font.data);
+    //     createText(CurrentFont,'asdasd');
+    //     // group.dispose();
+    //     cube.position.x = 2;
+    //     // scene.remove(cube);
+    // }
 
     requestAnimationFrame(animate);
     camera.lookAt(cameraTarget); 
@@ -149,7 +157,6 @@ function animate() {
 
     renderer.render(scene, camera);
 }
-
 
 
 // AUTO RESIZE CANVAS
@@ -196,7 +203,7 @@ function loadFont(passedFontObject) {
 
 
 
-// function makeTextMesh(FontObject,TextString,CoordinateObject,MaterialObject)
+function makeTextMesh(FontObject,TextString,CoordinateObject,MaterialObject)
 
 
 
@@ -247,15 +254,9 @@ function hideElement(){
     console.log('Bravo');
     if(flg) {
         flg = false;
-        // group.remove(textMesh1);
-        // textMesh1.material = materials2;
-        materials[0].color.setHex( 0xff0000 );
-    }
+        group.remove(textMesh1);}
     else {
         flg = true;
-        // group.add(textMesh1);
-        // textMesh1.material = materials;
-        materials[0].color.setHex( 0x00ff00 );
-    }
+        group.add(textMesh1);}
 
 }

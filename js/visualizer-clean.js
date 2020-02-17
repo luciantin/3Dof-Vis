@@ -51,9 +51,10 @@ class instancedMeshMapMember {
         this.textMesh;
     }
 
+    //TODO should return mesh so it can be put in group
     Init(){
         this.textMesh = new THREE.InstancedMesh(makeTextGeo(CurrentFont,this.value),textMaterials[0],this.counter);
-        scene.add(this.textMesh);
+        scene.add(this.textMesh); //IMPORTANT
     }
 
     upCount(){ this.counter ++; }
@@ -63,18 +64,7 @@ class instancedMeshMapMember {
     getCount(){ return this.counter }
 }
 
-// base helper class for holding coordinates
-class CoordinateHolder {
-    constructor(px = 0,py = 0,pz = 0,rx = 0,ry = 0){
-        this.px = px;
-        this.py = py;
-        this.pz = pz;
-        this.rx = rx;
-        this.ry = ry;
-    }
-}
-
-// object type that LangReader returns when readCurrentCommand();
+// object type that LangReader returns when readCurrentCommand(); , COORDINATES IN THE TEXT Command ARRAY
 class CommandHolder {
     constructor(value,px,py,pz){
         this.value = value;
@@ -84,10 +74,31 @@ class CommandHolder {
     }
 }
 
+// base helper class for holding coordinates
+class CoordinateHolder {
+
+    constructor(
+        position = new THREE.Vector3(0,0,0),
+        scale    = new THREE.Vector3(1,1,1),
+        rotation = new THREE.Euler( 0, 0, 0, 'XYZ'))
+        {
+        this.position = position;
+        this.scale    = scale;
+        this.rotation = rotation;
+    }
+}
+
+
 //used to translate from coordinates to the index of InstancedMesh Inside of instancedMeshMap Map
 class MeshCommandHolder extends CoordinateHolder{
-    constructor(meshArrayIndex,value,px = 0,py = 0,pz = 0,rx = 0,ry = 0){
-        super(px,py,pz,rx,ry);
+
+    constructor(
+        meshArrayIndex,value,
+        position = new THREE.Vector3(0,0,0),
+        scale    = new THREE.Vector3(1,1,1),
+        rotation = new THREE.Euler( 0, 0, 0, 'XYZ'))
+        {
+        super(position,scale,rotation);
         this.meshArrayIndex = meshArrayIndex;
         this.value = value;
     }
@@ -103,8 +114,8 @@ class MeshCommandHolder extends CoordinateHolder{
 // text to be displayed
 let TextDisplayMatrix = {
         
-    
-    loadProgramText: function(progText){
+    //First run this to fil the content
+    loadProgramText: function(progText,instancedMeshMap){
         this.content = new Array(progText.length); //make pages
 
         for(let i = 0; i < progText.length; i++) {
@@ -114,13 +125,13 @@ let TextDisplayMatrix = {
         }   
 
         //Copy elements 
-        for(let i = 0; i<this.content.length; i++) for(let j = 0; j<this.content[i].length; j++) for(let l = 0; l<this.content[i][j].length; l++) this.content[i][j][l] = this.commandTextToMeshHolder(progText[i][j][l],i,j,l);
+        for(let i = 0; i<this.content.length; i++) for(let j = 0; j<this.content[i].length; j++) for(let l = 0; l<this.content[i][j].length; l++) this.content[i][j][l] = this.commandTextToMeshHolder(progText[i][j][l],instancedMeshMap,i,j,l);
 
-        //Fill content
+        
         console.table(this.content); 
     },
 
-    commandTextToMeshHolder: function(value,x,y,z){
+    commandTextToMeshHolder: function(value,instancedMeshMap,x,y,z){
         
         let count;
 
@@ -139,12 +150,16 @@ let TextDisplayMatrix = {
         let tmp_MCH = new MeshCommandHolder(
             count,
             value,
-            0,0,0,
-            0,0
+            new THREE.Vector3(x,y,z),
+            new THREE.Vector3(1,1,1),
+            new THREE.Euler( 0, 0, 0, 'XYZ')
         );
 
         return tmp_MCH;
     }
+
+    
+
 
 }
 
@@ -206,11 +221,11 @@ let LangReader = {
 };
 
 
-
+// holds info about font ...
 let CurrentFont = {
     font: undefined, //Holds JSON font
     height: 20,
-    size: 70,
+    size: 30,
     hover: 30,
     curveSegments: 4,
     bevelThickness: 2,
@@ -224,9 +239,17 @@ let CurrentFont = {
 };
 
 
+let instancedMeshMapController = {
+    content : new Map,
+
+    refreshTransformID : function(index){
+        this.content.get(index).
+    }
+};
+
 // MAPzz
 
-let instancedMeshMap = new Map;
+// let instancedMeshMap = new Map;
 
 
 
@@ -234,11 +257,11 @@ let instancedMeshMap = new Map;
     // Global Vars //
     /////////////////
 // 
-let currentCoord = new CoordinateHolder();
+// let currentCoord = new CoordinateHolder();
 
 // Text Display Vars
-let centerCoord = new CoordinateHolder;
-let startCoord = new CoordinateHolder;
+// let centerCoord = new CoordinateHolder;
+// let startCoord = new CoordinateHolder;
 
 //moze se ucitat tek kad se font ucita
 let CAN_TEXT_MATRIX_BE_LOADED = false;
@@ -310,10 +333,10 @@ console.table(LangReader.progTextMatrix);
 
 
 
-TextDisplayMatrix.loadProgramText(LangReader.progTextMatrix);
+TextDisplayMatrix.loadProgramText(LangReader.progTextMatrix,instancedMeshMapController.content);
 
 
-console.table(instancedMeshMap);
+console.table(instancedMeshMapController.content);
 
 
 
@@ -353,32 +376,35 @@ function animate() {
     if(CurrentFont.fontLoaded == true && CAN_TEXT_MATRIX_BE_LOADED == false) CAN_TEXT_MATRIX_BE_LOADED = true;
     if(CAN_TEXT_MATRIX_BE_LOADED && SHOULD_TEXT_MATRIX_BE_LOADED){
         SHOULD_TEXT_MATRIX_BE_LOADED = false;
-        let textMesh = new THREE.InstancedMesh(makeTextGeo(CurrentFont,'this.value'),textMaterials[0],10);
-        var dummy = new THREE.Object3D();
 
-        for ( var i = 0; i < 10; i ++ ) {
-        
-            dummy.position.set(
-                Math.random() * 20 - 10,
-                Math.random() * 20 - 10,
-                Math.random() * 20 - 10
-            );
-        
-            dummy.rotation.set(
-                Math.random() * Math.PI,
-                Math.random() * Math.PI,
-                Math.random() * Math.PI
-            );
-        
-            dummy.updateMatrix();
-        
-            textMesh.setMatrixAt( i, dummy.matrix );
-        
-        }
-        textMesh.position.x = 5;
-        textMesh.position.y = 5;
+        // let textMesh = new THREE.InstancedMesh(makeTextGeo(CurrentFont,'Testing'),textMaterials[1],10);
+        // var dummy = new THREE.Object3D();
 
-        scene.add(textMesh);
+        // for ( var i = 0; i < 10; i ++ ) {
+        
+        //     dummy.position.set(
+        //         0,0,0
+        //         // Math.random() * 20 - 10,
+        //         // Math.random() * 20 - 10,
+        //         // Math.random() * 20 - 10
+        //     );
+        
+        //     dummy.rotation.set(
+        //         0,0,0
+        //         // Math.random() * Math.PI,
+        //         // Math.random() * Math.PI,
+        //         // Math.random() * Math.PI
+        //     );
+        
+        //     dummy.updateMatrix();
+        
+        //     textMesh.setMatrixAt( i, dummy.matrix );
+        
+        // }
+        // textMesh.position.x = 0;
+        // textMesh.position.y = 0;
+
+        // scene.add(textMesh);
 
         console.log('wdwdwd');
     }

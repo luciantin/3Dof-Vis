@@ -1,38 +1,3 @@
-
-                        /////////////////
-                        //    Steps    //
-///////////////////////////////////////////////////////////////////
-//
-// 1. Load text in LangReader
-//    - from program text to 3D array of commands
-//
-// 2. Load array from LangReader to TextDisplayMatrix
-//
-//    - creates a 3d array of MeshCommandHolder objects
-//      that contain the position, scale, rotation, 
-//      instanceMapIndex (index of the command in the InstanceMesh) 
-//      and value (command text)
-//      
-//    - either adds the command text as a new element of 
-//      InstanceMeshMap or it increments the count of how many to
-//      instance
-//
-// 3. InitMesh(), setMaterial(), setTransform()
-//
-//    - initialise the InstancedMesh for each Map element
-//
-//    - set the material of InstancedMesh for each Map element
-//
-//    - set the pos, rot, scale for each element of InstancedMesh
-//      ( do it for each InstancedMesh (Map element (instancedMeshMapMember)) )
-//
-// 4. GetMesh() for each Map element and add it to group
-//
-// 5. Display group
-//
-///////////////////////////////////////////////////////////////////
-
-
 // Imports
 
 import * as THREE from '../node_modules/three/build/three.module.js';
@@ -42,11 +7,15 @@ import { GeometryUtils } from '../node_modules/three/examples/jsm/utils/Geometry
 // Bitno za nesto
 THREE.Cache.enabled = true;
 
+
+// l col (1d arr)
+// j row (2d arr)
+// i pge (3d arr)
 let vanillaProgTextMatrix = [
 
-    [['NOP','NOP','NOP'],
-     ['NOP','NOP','NOP'],
-     ['NOP','NOP','NOP'],],
+    [['1','A','B'],
+     ['2','NOP','NOP'],
+     ['3','NOP','NOP'],],
 
     [['NOP','NOP','NOP'],
      ['NOP','NOP','NOP'],
@@ -78,7 +47,66 @@ let vanillaProgTextMatrix2 = [
 
 // Classes
 
+class TextDisplayController {
+
+    constructor(){}
+
+    Init(){
+
+
+        // let i = TextDisplayMatrix.content.length;
+        // let i = TextDisplayMatrix.content.length;
+        // let i = TextDisplayMatrix.content.length
+
+        //Assign t oeach Mesh Instance its setting
+        for(let i = 0; i<TextDisplayMatrix.content.length;i++){
+            for(let j = 0; j<TextDisplayMatrix.content[i].length;j++){
+                for(let l = 0; l<TextDisplayMatrix.content[i][j].length;l++){
+
+                    //Get Values From Array 
+                    let value = TextDisplayMatrix.content[i][j][l].value;
+                    let index = TextDisplayMatrix.content[i][j][l].index;
+
+                    let position = TextDisplayMatrix.content[i][j][l].position;
+                    let scale = TextDisplayMatrix.content[i][j][l].scale;
+                    let rotation = TextDisplayMatrix.content[i][j][l].rotation;
+
+                    instancedMeshMapController.content
+
+                    
+                    // console.log(value)
+                }
+                // console.log('\n')
+            }
+            // console.log('<><><><><><><><><><><><><>')
+        }
+
+    }
+
+    clear(){}
+
+    refreshFull(){}
+
+    setMaterial(value,index,Material){
+
+    }
+
+    setTransform(value,index,position,scale,rotation){
+        let tmpMatrix = new THREE.Matrix4().compose(
+            position,
+            new THREE.Quaternion().setFromEuler(rotation),
+            scale
+        );
+
+        instancedMeshMapController.getMesh(value).setMatrixAt(index,tmpMatrix);
+    }
+
+
+}
+
+
 // elements of instancedMeshMap
+// holds the InstancedMesh for single command
 class instancedMeshMapMember {
     constructor(value){
         this.value = value;
@@ -87,9 +115,9 @@ class instancedMeshMapMember {
     }
 
     //TODO 
-    Init(){
-        this.textMesh = new THREE.InstancedMesh(makeTextGeo(CurrentFont,this.value),textMaterials[0],this.counter);
-        scene.add(this.textMesh); //FIXME
+    Init(material){
+        this.textMesh = new THREE.InstancedMesh(makeTextGeo(CurrentFont,this.value),material,this.counter);
+        // scene.add(this.textMesh); //FIXME
     }
 
     upCount(){ this.counter ++; }
@@ -193,9 +221,6 @@ let TextDisplayMatrix = {
         return tmp_MCH;
     }
 
-    
-
-
 }
 
 // 3dof lang reader
@@ -276,12 +301,7 @@ let CurrentFont = {
 
 
 // value = key = command (ex. 'NOP' )
-//STEPS :
-// 1. load text in LangReader
-// 2. load array from LangReader to TextDisplayMatrix
-// 3. initMesh(), setMaterial(), setTransform()
-// 4. getMesh() and add it to group
-// 5. display group
+
 let instancedMeshMapController = {
     content : new Map,
 
@@ -295,7 +315,7 @@ let instancedMeshMapController = {
     
     getMesh  : function(value){ return this.content.get(value).textMesh; },
 
-    initMesh : function(value){ this.content.get(value).Init(); }
+    initMesh : function(value,material){ this.content.get(value).Init(material); }
 
 };
 
@@ -308,12 +328,8 @@ let instancedMeshMapController = {
     /////////////////
     // Global Vars //
     /////////////////
-// 
-// let currentCoord = new CoordinateHolder();
 
-// Text Display Vars
-// let centerCoord = new CoordinateHolder;
-// let startCoord = new CoordinateHolder;
+
 
 //moze se ucitat tek kad se font ucita
 let CAN_TEXT_MATRIX_BE_LOADED = false;
@@ -365,7 +381,7 @@ scene.add(tst_cube);
 
 // Materials
 
-let textMaterials = [
+let basicTextMaterials = [
     new THREE.MeshBasicMaterial( { color: 0x00ff00 } ),
     new THREE.MeshNormalMaterial()
 ]
@@ -381,18 +397,14 @@ loadFont(CurrentFont);
 
 LangReader.loadProgramText();
 // console.log(LangReader.readCurrentCommand());
-console.table(LangReader.progTextMatrix);
-
-
+// console.table(LangReader.progTextMatrix);
 
 TextDisplayMatrix.loadProgramText(LangReader.progTextMatrix,instancedMeshMapController.content);
 
-
-console.table(instancedMeshMapController.content);
-
+// console.table(instancedMeshMapController.content);
 
 
-init();
+initCanvas();
 
 
 // Looped
@@ -406,7 +418,7 @@ animate();
 
 // Functions
 
-function init(){
+function initCanvas(){
     const canvas = document.getElementById("Visualizer-O-Matic-9000");
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
@@ -426,11 +438,12 @@ function animate() {
 
     // font se ucitao pa se inita text 
     if(CurrentFont.fontLoaded == true && CAN_TEXT_MATRIX_BE_LOADED == false) CAN_TEXT_MATRIX_BE_LOADED = true;
+
     if(CAN_TEXT_MATRIX_BE_LOADED && SHOULD_TEXT_MATRIX_BE_LOADED){
-        SHOULD_TEXT_MATRIX_BE_LOADED = false;
+        SHOULD_TEXT_MATRIX_BE_LOADED = false; //jer je ucitana
 
 
-        instancedMeshMapController.initMesh('NOP');
+        instancedMeshMapController.initMesh('NOP',basicTextMaterials[1]);
         let textMesh = instancedMeshMapController.getMesh('NOP');
         var dummy = new THREE.Object3D();
 
@@ -455,41 +468,19 @@ function animate() {
             textMesh.setMatrixAt( i, dummy.matrix );
         
         }
+
         textMesh.position.x = 0;
         textMesh.position.y = 0;
 
         scene.add(textMesh);
 
-        // let textMesh = new THREE.InstancedMesh(makeTextGeo(CurrentFont,'Testing'),textMaterials[1],10);
-        // var dummy = new THREE.Object3D();
-
-        // for ( var i = 0; i < 10; i ++ ) {
-        
-        //     dummy.position.set(
-        //         0,0,0
-        //         // Math.random() * 20 - 10,
-        //         // Math.random() * 20 - 10,
-        //         // Math.random() * 20 - 10
-        //     );
-        
-        //     dummy.rotation.set(
-        //         0,0,0
-        //         // Math.random() * Math.PI,
-        //         // Math.random() * Math.PI,
-        //         // Math.random() * Math.PI
-        //     );
-        
-        //     dummy.updateMatrix();
-        
-        //     textMesh.setMatrixAt( i, dummy.matrix );
-        
-        // }
-        // textMesh.position.x = 0;
-        // textMesh.position.y = 0;
-
-        // scene.add(textMesh);
 
         console.log('wdwdwd');
+
+        let tsts = new TextDisplayController();
+        tsts.Init();
+
+
     }
 
     renderer.clear();

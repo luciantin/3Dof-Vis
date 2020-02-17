@@ -1,0 +1,51 @@
+
+                        /////////////////
+                        //    Steps    //
+///////////////////////////////////////////////////////////////////
+// 0. Wait for font to load.... THEN :
+//
+// 1. Load text in LangReader
+//    - from program text to 3D array of commands
+//
+// 2. Load array from LangReader to TextDisplayMatrix
+//
+//    - creates a 3d array of MeshCommandHolder objects
+//      that contain the position, scale, rotation, 
+//      instanceMapIndex (index of the command in the InstanceMesh) 
+//      and value (command text)
+//      
+//    - either adds the command text as a new element of 
+//      InstanceMeshMap or it increments the count of how many to
+//      instance
+//
+// 3. InitMesh(), setMaterial(), setTransform()
+//
+//    - initialise the InstancedMesh for each Map element
+//
+//    - set the material of InstancedMesh for each Map element
+//
+//    - set the pos, rot, scale for each element of InstancedMesh
+//      ( do it for each InstancedMesh (Map element (instancedMeshMapMember)) )
+//
+// 4. GetMesh() for each Map element and add it to group
+//
+// 5. Display group
+//
+///////////////////////////////////////////////////////////////////
+
+
+
+       z/j
+        |
+        |  x
+        |______
+     y /
+      /  
+
+
+//STEPS :
+// 1. load text in LangReader
+// 2. load array from LangReader to TextDisplayMatrix
+// 3. initMesh(), setMaterial(), setTransform()
+// 4. getMesh() and add it to group
+// 5. display group

@@ -1,3 +1,38 @@
+
+                        /////////////////
+                        //    Steps    //
+///////////////////////////////////////////////////////////////////
+//
+// 1. Load text in LangReader
+//    - from program text to 3D array of commands
+//
+// 2. Load array from LangReader to TextDisplayMatrix
+//
+//    - creates a 3d array of MeshCommandHolder objects
+//      that contain the position, scale, rotation, 
+//      instanceMapIndex (index of the command in the InstanceMesh) 
+//      and value (command text)
+//      
+//    - either adds the command text as a new element of 
+//      InstanceMeshMap or it increments the count of how many to
+//      instance
+//
+// 3. InitMesh(), setMaterial(), setTransform()
+//
+//    - initialise the InstancedMesh for each Map element
+//
+//    - set the material of InstancedMesh for each Map element
+//
+//    - set the pos, rot, scale for each element of InstancedMesh
+//      ( do it for each InstancedMesh (Map element (instancedMeshMapMember)) )
+//
+// 4. GetMesh() for each Map element and add it to group
+//
+// 5. Display group
+//
+///////////////////////////////////////////////////////////////////
+
+
 // Imports
 
 import * as THREE from '../node_modules/three/build/three.module.js';
@@ -51,10 +86,10 @@ class instancedMeshMapMember {
         this.textMesh;
     }
 
-    //TODO should return mesh so it can be put in group
+    //TODO 
     Init(){
         this.textMesh = new THREE.InstancedMesh(makeTextGeo(CurrentFont,this.value),textMaterials[0],this.counter);
-        scene.add(this.textMesh); //IMPORTANT
+        scene.add(this.textMesh); //FIXME
     }
 
     upCount(){ this.counter ++; }
@@ -239,12 +274,29 @@ let CurrentFont = {
 };
 
 
+
+// value = key = command (ex. 'NOP' )
+//STEPS :
+// 1. load text in LangReader
+// 2. load array from LangReader to TextDisplayMatrix
+// 3. initMesh(), setMaterial(), setTransform()
+// 4. getMesh() and add it to group
+// 5. display group
 let instancedMeshMapController = {
     content : new Map,
 
-    refreshTransformID : function(index){
-        this.content.get(index).
-    }
+    setTransform : function(TmpMeshCommandHolder){
+        this.content.get(value);
+    },
+
+    setMaterial : function(value,material){
+        this.content.get(value).textMesh.material = material;
+    },
+    
+    getMesh  : function(value){ return this.content.get(value).textMesh; },
+
+    initMesh : function(value){ this.content.get(value).Init(); }
+
 };
 
 // MAPzz
@@ -376,6 +428,37 @@ function animate() {
     if(CurrentFont.fontLoaded == true && CAN_TEXT_MATRIX_BE_LOADED == false) CAN_TEXT_MATRIX_BE_LOADED = true;
     if(CAN_TEXT_MATRIX_BE_LOADED && SHOULD_TEXT_MATRIX_BE_LOADED){
         SHOULD_TEXT_MATRIX_BE_LOADED = false;
+
+
+        instancedMeshMapController.initMesh('NOP');
+        let textMesh = instancedMeshMapController.getMesh('NOP');
+        var dummy = new THREE.Object3D();
+
+        for ( var i = 0; i < 10; i ++ ) {
+        
+            dummy.position.set(
+                0,0,0
+                // Math.random() * 20 - 10,
+                // Math.random() * 20 - 10,
+                // Math.random() * 20 - 10
+            );
+        
+            dummy.rotation.set(
+                0,0,0
+                // Math.random() * Math.PI,
+                // Math.random() * Math.PI,
+                // Math.random() * Math.PI
+            );
+        
+            dummy.updateMatrix();
+        
+            textMesh.setMatrixAt( i, dummy.matrix );
+        
+        }
+        textMesh.position.x = 0;
+        textMesh.position.y = 0;
+
+        scene.add(textMesh);
 
         // let textMesh = new THREE.InstancedMesh(makeTextGeo(CurrentFont,'Testing'),textMaterials[1],10);
         // var dummy = new THREE.Object3D();

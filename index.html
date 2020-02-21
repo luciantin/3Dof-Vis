@@ -23,6 +23,10 @@
     <header id="header-main">
         <div class="container-flex px-3 bg-dark">
 
+
+            <!-- <a href="#" class="btn hide-all p-1 txt-font-size-medium txt-light mx-2 ">Hide All</a> -->
+
+            <div class="container-flex">
             <a href="#" class="btn overlay-open-about p-1 txt-font-size-medium txt-light">About</a>
 
             <div class="header-logo mx-5">
@@ -30,6 +34,9 @@
             </div>
 
             <a target="_blank" rel="noopener noreferrer" href="https://github.com/luciantin/Racket_Lang" class="btn p-1 txt-font-size-medium txt-light">Sauce</a>
+            </div>
+
+            <!-- <a href="#" class="btn hide-all p-1 txt-font-size-medium txt-light mx-2 visibility-no">Show Sidebar</a> -->
 
         </div>
     </header>
@@ -40,13 +47,46 @@
     <section id="content">
         <div class="visualizer-container">
             <canvas class="visualizer-canvas" id="Visualizer-O-Matic-9000"></canvas>
-            <p style="position: absolute; top: 10px; width: 100%; text-align: center; z-index: 150; display:block; ">TESTING</p>
         </div>
 
         <div class="visualizer-menu bg-light">
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi minima doloribus placeat natus tempore libero commodi nobis voluptas officiis molestias! Quam officiis alias placeat obcaecati eveniet repellendus doloremque. Minus laudantium maxime placeat, tempore blanditiis ullam iure id et error. Fugiat?</p>
+            <div class="vis-menu-navigation " >
+                <a href="#" class="btn txt-font-size-medium txt-light px-2" id="vis-menu-btn-text">Text</a>
+                <a href="#" class="btn txt-font-size-medium txt-light px-2" id="vis-menu-btn-settings">Setting</a>
+                <a href="#" class="btn txt-font-size-medium txt-light px-2" id="vis-menu-btn-display">Display</a>
+                <a href="#" class="btn txt-font-size-medium txt-light px-2" id="vis-menu-btn-hide">Hide</a>
+            </div>
+
+            <div class="vis-menu-content">
+                <!-- <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur qui animi accusantium perferendis minus odit officia quae velit corporis placeat ratione esse rerum vero eos, eaque, aliquam ullam harum expedita.</p> -->
+                <textarea name="" id="vis-text-input" cols="30" rows="10" ></textarea>
+
+                <div id="vis-settings">
+                </div>
+
+                <div class="vis-display">
+                </div>
+            </div>
+            
         </div>
     </section>
+
+
+    <!-- Prog Control -->
+
+    <div class="prog-control" style="position: absolute; bottom: 10px;  text-align: center; z-index: 150; display:block;">
+        <div class="prog-control-menu">
+            <a href="#" class="btn txt-font-size-medium txt-light px-2 mx-1" id="prog-control-btn-auto">Play</a>
+            <a href="#" class="btn txt-font-size-medium txt-light px-2 mx-1" id="prog-control-btn-auto">Pause</a>
+            <a href="#" class="btn txt-font-size-medium txt-light px-2 mx-1" id="prog-control-btn-next">Next</a>
+            <a href="#" class="btn txt-font-size-medium txt-light px-2 mx-1" id="prog-control-btn-speed">Speed 2X</a>
+            <a href="#" class="btn txt-font-size-medium txt-light px-2 mx-1" id="prog-control-btn-load">Load</a>
+            <a href="#" class="btn txt-font-size-medium txt-light px-2 mx-1" id="prog-control-btn-toggle-visibility">Hide All</a>
+        </div>
+    </div>
+
+
+    <!-- <p style="color:red; position: absolute; top: 10px; width: 100%; text-align: center; z-index: 150; display:block; ">TESTING</p> -->
 
 
     <!-- JS -->

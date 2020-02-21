@@ -525,3 +525,56 @@ function makeTextGeo(FontObject,TextString){
     return textGeo;
 }
 
+
+// *********************************** //
+/////////////////////////////////////////
+/////////////////////////////////////////
+///////////    UI Interaction    ////////
+/////////////////////////////////////////
+/////////////////////////////////////////
+// *********************************** //
+
+
+
+// Hide Menu Button 
+
+let visMenu = document.querySelector('.visualizer-menu');
+let visMenuBtnHide = document.querySelector('#vis-menu-btn-hide');
+let progCntrlShowAll = document.querySelector('#prog-control-btn-toggle-visibility');
+
+
+visMenuBtnHide.addEventListener('click',ToggleMenuVisibility);
+
+function ToggleMenuVisibility() {
+    visMenu.classList.toggle('hide')
+}
+
+
+
+/////////////////////////////////////////
+////////       Header Menu      /////////
+/////////////////////////////////////////
+
+
+
+/////////////////////////////////////////
+////////     Program Control    /////////
+/////////////////////////////////////////
+
+
+
+/////////////////////////////////////////
+////////        Vis Menu        /////////
+/////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+

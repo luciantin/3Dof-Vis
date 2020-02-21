@@ -258,4 +258,4 @@ function hideElement(){
         materials[0].color.setHex( 0x00ff00 );
     }
 
-}
+}visualizer-menu

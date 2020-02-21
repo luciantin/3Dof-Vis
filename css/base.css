@@ -155,3 +155,14 @@ a { text-decoration: none;}
 }
 .btn-current{ background: var(--btn-color-current);}
 
+
+
+
+.hide{ display: none; }
+
+.unhide-block{ display: block; }
+.unhide-inline{ display: inline; }
+.unhide-inline-block{ display: inline-block; }
+
+.visibility-no{ visibility: hidden;}
+.visibility-yes{ visibility: visible;}

@@ -157,12 +157,13 @@ a { text-decoration: none;}
 
 
 
+/*  classes  for JS */
 
-.hide{ display: none; }
+.hide{ display: none !important; }
 
-.unhide-block{ display: block; }
-.unhide-inline{ display: inline; }
-.unhide-inline-block{ display: inline-block; }
+.unhide-block{ display: block !important; }
+.unhide-inline{ display: inline !important; }
+.unhide-inline-block{ display: inline-block !important; }
 
-.visibility-no{ visibility: hidden;}
-.visibility-yes{ visibility: visible;}
+.visibility-no{ visibility: hidden !important;}
+.visibility-yes{ visibility: visible !important;}

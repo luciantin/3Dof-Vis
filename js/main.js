@@ -90,26 +90,52 @@ let vanillaProgTextMatrix2 = [
 
 
 
+////////////////////////////
+///  Load Prog in TextArea
+////////////////////////////
+
+let visMenuTextArea = document.getElementById('vis-text-input');
+visMenuTextArea.value = progText;
+
+
 // Classes
 class TextDisplayController {
 
     constructor(){
-        this.textDirection = 4;
+        this.textDirection = 3;
         this.textDirections = [ 'Front2Back', 'Back2Front', 'Left2Right', 'Top2Bottom', 'Bottom2Top'];
-    }
+        this.content = 0;
+        this.CurrentFont = {
+            font: undefined, //Holds JSON font
+            height: 20,
+            size: 30,
+            hover: 30,
+            curveSegments: 4,
+            bevelThickness: 2,
+            bevelSize: 1.5,
+            weightMapValue: 0,
+            fontMapValue: 0,
+            bevelEnabled: true,
+            fontLoaded: false,
+            weightMap: ["regular", "bold"],
+            fontMap: [ "helvetiker","optimer","gentilis","droid/droid_sans","droid/droid_serif"]
+        };
+    };
 
-    Init(){
+    Init(Text){
 
-        for(let i = TextDisplayMatrix.content.length - 1; i >= 0;i--){
-                for(let j = TextDisplayMatrix.content[i].length - 1; j >= 0; j--){
-                    for(let l = TextDisplayMatrix.content[i][j].length - 1; l >= 0;l--){
+        this.loadProgramText(Text);
+
+        for(let i = this.content.length - 1; i >= 0;i--){
+                for(let j = this.content[i].length - 1; j >= 0; j--){
+                    for(let l = this.content[i][j].length - 1; l >= 0;l--){
     
                         //Get Values From Array 
-                        let value = TextDisplayMatrix.content[i][j][l].value;
+                        let value = this.content[i][j][l].value;
     
-                        let position = TextDisplayMatrix.content[i][j][l].position;
-                        let scale = TextDisplayMatrix.content[i][j][l].scale;
-                        let rotation = TextDisplayMatrix.content[i][j][l].rotation;
+                        let position = this.content[i][j][l].position;
+                        let scale = this.content[i][j][l].scale;
+                        let rotation = this.content[i][j][l].rotation;
                         let x,y,z;
 
                         //ok
@@ -123,14 +149,14 @@ class TextDisplayController {
                         if(this.textDirections[this.textDirection] == 'Front2Back'){
                             x = l * 100;
                             y = j * 100; 
-                            z = (TextDisplayMatrix.content.length - 1 - i ) * 100;
+                            z = (this.content.length - 1 - i ) * 100;
                         }
 
                         //ok
                         if(this.textDirections[this.textDirection] == 'Top2Bottom'){
                             x = l * 100;
                             z = j * 100; 
-                            y = (TextDisplayMatrix.content.length - 1 - i ) * 100;
+                            y = (this.content.length - 1 - i ) * 100;
                         }
 
                         //ok
@@ -141,17 +167,58 @@ class TextDisplayController {
                         }
 
 
-                        TextDisplayMatrix.content[i][j][l].mesh =   makeTextMesh(CurrentFont,value,
+                        this.content[i][j][l].mesh =   makeTextMesh(this.CurrentFont,value,
                                                                     x,y,z
                                                                     ,TextMaterials[1])
                         
-                        scene.add(TextDisplayMatrix.content[i][j][l].mesh);
+                        scene.add(this.content[i][j][l].mesh);
     
                     }
                 }
             }
 
-    }
+    };
+
+
+    //First run this to fil the content
+    loadProgramText(progText){
+    this.content = new Array(progText.length); //make pages
+
+    for(let i = 0; i < progText.length; i++) {
+        this.content[i] = new Array(progText[i].length); //add rows to each page
+        //add elements to each row
+        for(let j = 0;j<progText[i].length;j++) this.content[i][j] = new Array(progText[i][j].length);
+    }   
+
+    //Copy elements 
+    for(let i = 0; i<this.content.length; i++) for(let j = 0; j<this.content[i].length; j++) for(let l = 0; l<this.content[i][j].length; l++) this.content[i][j][l] = this.commandTextToMeshHolder(progText[i][j][l],i,j,l);
+
+    
+    // console.table(this.content); 
+    };
+
+
+    commandTextToMeshHolder(value,x,y,z){
+
+    //Create And Return CommandHolder
+    let tmp_MCH = new MeshCommandHolder(
+        value,
+        new THREE.Vector3(x,y,z),
+        new THREE.Vector3(1,1,1),
+        new THREE.Euler( 0, 0, 0, 'XYZ')
+    );
+
+    return tmp_MCH;
+    };
+
+    clear(){
+        if(this.content != 0)
+            for(let i = this.content.length - 1; i >= 0;i--)
+                for(let j = this.content[i].length - 1; j >= 0; j--)
+                    for(let l = this.content[i][j].length - 1; l >= 0;l--) scene.remove(this.content[i][j][l].mesh);
+        this.content = 0;
+    };
+
 
     // clear(){}
 
@@ -169,9 +236,6 @@ class TextDisplayController {
     //     );
         
     // }
-
-    
-
 
 }
 
@@ -222,40 +286,6 @@ class MeshCommandHolder extends CoordinateHolder{
 // Object Literals
 
 
-// text to be displayed
-let TextDisplayMatrix = {
-        
-    //First run this to fil the content
-    loadProgramText: function(progText){
-        this.content = new Array(progText.length); //make pages
-
-        for(let i = 0; i < progText.length; i++) {
-            this.content[i] = new Array(progText[i].length); //add rows to each page
-            //add elements to each row
-            for(let j = 0;j<progText[i].length;j++) this.content[i][j] = new Array(progText[i][j].length);
-        }   
-
-        //Copy elements 
-        for(let i = 0; i<this.content.length; i++) for(let j = 0; j<this.content[i].length; j++) for(let l = 0; l<this.content[i][j].length; l++) this.content[i][j][l] = this.commandTextToMeshHolder(progText[i][j][l],i,j,l);
-
-        
-        // console.table(this.content); 
-    },
-
-    commandTextToMeshHolder: function(value,x,y,z){
-
-        //Create And Return CommandHolder
-        let tmp_MCH = new MeshCommandHolder(
-            value,
-            new THREE.Vector3(x,y,z),
-            new THREE.Vector3(1,1,1),
-            new THREE.Euler( 0, 0, 0, 'XYZ')
-        );
-
-        return tmp_MCH;
-    }
-
-}
 
 // 3dof lang reader
 let LangReader = {
@@ -264,24 +294,24 @@ let LangReader = {
     commandHistory : [],
 
     // 3Dof Program text
-    progTextMatrix : [],
+    content : [],
 
     //z - page , y - row , x - elem 
     // progTextMatrixSize  : { x:0, y:0, z:0},  
     progTextMatrixStart : { x:0, y:0, z:0},  //pocetna
     progTextMatrixCrnt  : { x:0, y:0, z:0},  //trenutna 
 
-    //Load Program text from WebPage to progTextMatrix
+    //Load Program text from WebPage to content
     loadProgramText : function(Text){
 
         //TODO load prog text
 
         for(let i = 0; i < Text.length; i++){
-            this.progTextMatrix.push(Text[i].page);
+            this.content.push(Text[i].page);
             if(Text[i].id = 'STR') this.progTextMatrixStart.z = i;
         }
 
-        // this.progTextMatrix = Text;
+        // this.content = Text;
 
         this.progTextMatrixStart.x = 0;
         this.progTextMatrixStart.y = 0;
@@ -291,10 +321,14 @@ let LangReader = {
         console.log('Load Prog Text : OK');
     },
 
+    step : function(){
+        this.readCurrentCommand();
+    },
+
     //vrati kordinate trenutne naredbe
     readCurrentCommand : function(){
         let tmp_cmd = new CommandHolder(
-            this.progTextMatrix[this.progTextMatrixCrnt.z][this.progTextMatrixCrnt.y][this.progTextMatrixCrnt.x],
+            this.content[this.progTextMatrixCrnt.z][this.progTextMatrixCrnt.y][this.progTextMatrixCrnt.x],
             this.progTextMatrixCrnt.x,
             this.progTextMatrixCrnt.y,
             this.progTextMatrixCrnt.z
@@ -309,30 +343,17 @@ let LangReader = {
         console.load('Current Command : '+command);
     },
 
+    clear : function(){
+        this.content = [];
+    },
 
     // nextCommand : function(){
 
     // }
 };
 
-//OK
-// holds info about font ...
-let CurrentFont = {
-    font: undefined, //Holds JSON font
-    height: 20,
-    size: 30,
-    hover: 30,
-    curveSegments: 4,
-    bevelThickness: 2,
-    bevelSize: 1.5,
-    weightMapValue: 0,
-    fontMapValue: 0,
-    bevelEnabled: true,
-    fontLoaded: false,
-    weightMap: ["regular", "bold"],
-    fontMap: [ "helvetiker","optimer","gentilis","droid/droid_sans","droid/droid_serif"]
-};
 
+ 
 //OK
 //creates an array from text
 // Compiler.loadProgText(progText);
@@ -412,6 +433,16 @@ let Compiler = {
 };
 
 
+// progTextArea.load().textContent;
+let progTextArea = {
+
+    textContent : '',
+    load : function(){
+        this.textContent = visMenuTextArea.value;
+        return this; //Ez of use
+    }
+};
+
 
     /////////////////
     // Global Vars //
@@ -421,7 +452,7 @@ let Compiler = {
 
 //moze se ucitat tek kad se font ucita
 let CAN_TEXT_MATRIX_BE_LOADED = false;
-let SHOULD_TEXT_MATRIX_BE_LOADED = true;
+let SHOULD_TEXT_MATRIX_BE_LOADED = false;
 
 // Rendering Vars
 
@@ -481,21 +512,9 @@ let TextMaterials = [
 ///////////////////////////
 ///////////////////////////
 
-loadFont(CurrentFont);
+let DisplayControler = new TextDisplayController();
 
-
-
-Compiler.loadProgText(progText2); // ucita tekst sa ekrana TODO
-let tmpArrPrg = Compiler.CreateArrayFromProgramText();
-
-// console.table(tmpArrPrg);
-
-LangReader.loadProgramText(tmpArrPrg); // "Compiler" napravi array i langreader ga ucita
-
-
-
-TextDisplayMatrix.loadProgramText(LangReader.progTextMatrix);
-
+loadFont(DisplayControler.CurrentFont);
 
 
 initCanvas();
@@ -546,14 +565,26 @@ function animate() {
     camera.lookAt(cameraTarget); 
 
     // font se ucitao pa se inita text 
-    if(CurrentFont.fontLoaded == true && CAN_TEXT_MATRIX_BE_LOADED == false) CAN_TEXT_MATRIX_BE_LOADED = true;
-
+    if(DisplayControler.CurrentFont.fontLoaded == true && CAN_TEXT_MATRIX_BE_LOADED == false) CAN_TEXT_MATRIX_BE_LOADED = true;
     if(CAN_TEXT_MATRIX_BE_LOADED && SHOULD_TEXT_MATRIX_BE_LOADED){
+        
         SHOULD_TEXT_MATRIX_BE_LOADED = false; //jer je ucitana
+        
+        Compiler.loadProgText(progTextArea.load().textContent);
+        let tmpArrPrg = Compiler.CreateArrayFromProgramText();
 
-        let atts = new TextDisplayController().Init();
+        // console.log('progTextArea.load().textContent :', progTextArea.load().textContent);
+        console.log('tmpArrPrg :', tmpArrPrg);
 
-        console.log('OK');
+        LangReader.clear();
+        LangReader.loadProgramText(tmpArrPrg);
+        
+        DisplayControler.clear();
+        DisplayControler.Init(LangReader.content)
+        // console.log('LangReader.readCurrentCommand() :', LangReader.readCurrentCommand());
+
+
+        // console.log('OK');
 
     }
 
@@ -600,7 +631,7 @@ function loadFont(passedFontObject) {
 	function ( xhr ) {
         // console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
         console.log('Load Font : OK');
-        CurrentFont.fontLoaded = true;
+        passedFontObject.fontLoaded = true;
 	},
 	// onError callback
 	function ( err ) {
@@ -689,15 +720,31 @@ function makeTextGeo(FontObject,TextString){
 // Hide Menu Button 
 
 let visMenu = document.querySelector('.visualizer-menu');
-let visMenuBtnHide = document.querySelector('#vis-menu-btn-hide');
-let progCntrlShowAll = document.querySelector('#prog-control-btn-toggle-visibility');
+let visMenuBtnHide = document.getElementById('vis-menu-btn-hide');
+let progCntrlToggleVis = document.getElementById('prog-control-btn-toggle-visibility');
+let headerShowSidebar = document.getElementById('header-show-sidebar');
+let headerMain = document.getElementById('header-main');
 
 
 visMenuBtnHide.addEventListener('click',ToggleMenuVisibility);
+headerShowSidebar.addEventListener('click',ToggleMenuVisibility);
 
-function ToggleMenuVisibility() {
-    visMenu.classList.toggle('hide')
+progCntrlToggleVis.addEventListener('click',ToggleVisAll);
+
+function ToggleMenuVisibility() { 
+    visMenu.classList.toggle("hide"); 
+    headerShowSidebar.classList.toggle("visibility-no"); 
+
 }
+
+function ToggleVisAll() { 
+    visMenu.classList.toggle("hide"); 
+    headerMain.classList.toggle("hide"); 
+    headerShowSidebar.classList.toggle("visibility-no"); 
+
+}
+
+//SHOULD_TEXT_MATRIX_BE_LOADED
 
 
 
@@ -711,7 +758,15 @@ function ToggleMenuVisibility() {
 ////////     Program Control    /////////
 /////////////////////////////////////////
 
+// Load
 
+let progCntrlLoad = document.getElementById('prog-control-btn-load');
+
+progCntrlLoad.addEventListener('click', LoadProgFromTextArea);
+
+function LoadProgFromTextArea(){
+    SHOULD_TEXT_MATRIX_BE_LOADED = true;
+} 
 
 /////////////////////////////////////////
 ////////        Vis Menu        /////////

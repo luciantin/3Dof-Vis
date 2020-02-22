@@ -91,37 +91,65 @@ let vanillaProgTextMatrix2 = [
 
 
 // Classes
-
 class TextDisplayController {
 
-    constructor(){}
+    constructor(){
+        this.textDirection = 4;
+        this.textDirections = [ 'Front2Back', 'Back2Front', 'Left2Right', 'Top2Bottom', 'Bottom2Top'];
+    }
 
     Init(){
 
-        //Assign t oeach Mesh Instance its setting
-        for(let i = 0; i<TextDisplayMatrix.content.length;i++){
-            for(let j = 0; j<TextDisplayMatrix.content[i].length;j++){
-                for(let l = 0; l<TextDisplayMatrix.content[i][j].length;l++){
+        for(let i = TextDisplayMatrix.content.length - 1; i >= 0;i--){
+                for(let j = TextDisplayMatrix.content[i].length - 1; j >= 0; j--){
+                    for(let l = TextDisplayMatrix.content[i][j].length - 1; l >= 0;l--){
+    
+                        //Get Values From Array 
+                        let value = TextDisplayMatrix.content[i][j][l].value;
+    
+                        let position = TextDisplayMatrix.content[i][j][l].position;
+                        let scale = TextDisplayMatrix.content[i][j][l].scale;
+                        let rotation = TextDisplayMatrix.content[i][j][l].rotation;
+                        let x,y,z;
 
-                    //Get Values From Array 
-                    let value = TextDisplayMatrix.content[i][j][l].value;
+                        //ok
+                        if(this.textDirections[this.textDirection] == 'Back2Front'){
+                            x = l * 100;
+                            y = j * 100; 
+                            z = i * 100;
+                        }
 
-                    let position = TextDisplayMatrix.content[i][j][l].position;
-                    let scale = TextDisplayMatrix.content[i][j][l].scale;
-                    let rotation = TextDisplayMatrix.content[i][j][l].rotation;
+                        //ok
+                        if(this.textDirections[this.textDirection] == 'Front2Back'){
+                            x = l * 100;
+                            y = j * 100; 
+                            z = (TextDisplayMatrix.content.length - 1 - i ) * 100;
+                        }
 
-                    TextDisplayMatrix.content[i][j][l].mesh = makeTextMesh(CurrentFont,value,
-                        j*100,i*100,l*100
-                        ,TextMaterials[1])
-                    
-                    scene.add(TextDisplayMatrix.content[i][j][l].mesh);
+                        //ok
+                        if(this.textDirections[this.textDirection] == 'Top2Bottom'){
+                            x = l * 100;
+                            z = j * 100; 
+                            y = (TextDisplayMatrix.content.length - 1 - i ) * 100;
+                        }
 
-                    // console.log(value)
+                        //ok
+                        if(this.textDirections[this.textDirection] == 'Bottom2Top'){
+                            x = l * 100;
+                            z = j * 100; 
+                            y = i * 100;
+                        }
+
+
+                        TextDisplayMatrix.content[i][j][l].mesh =   makeTextMesh(CurrentFont,value,
+                                                                    x,y,z
+                                                                    ,TextMaterials[1])
+                        
+                        scene.add(TextDisplayMatrix.content[i][j][l].mesh);
+    
+                    }
                 }
-                // console.log('\n')
             }
-            // console.log('<><><><><><><><><><><><><>')
-        }
 
     }
 
@@ -141,6 +169,8 @@ class TextDisplayController {
     //     );
         
     // }
+
+    
 
 
 }
@@ -285,7 +315,7 @@ let LangReader = {
     // }
 };
 
-
+//OK
 // holds info about font ...
 let CurrentFont = {
     font: undefined, //Holds JSON font
@@ -303,7 +333,7 @@ let CurrentFont = {
     fontMap: [ "helvetiker","optimer","gentilis","droid/droid_sans","droid/droid_serif"]
 };
 
-
+//OK
 //creates an array from text
 // Compiler.loadProgText(progText);
 // Compiler.CreateArrayFromProgramText();
@@ -457,25 +487,16 @@ loadFont(CurrentFont);
 
 Compiler.loadProgText(progText2); // ucita tekst sa ekrana TODO
 let tmpArrPrg = Compiler.CreateArrayFromProgramText();
-console.table(tmpArrPrg);
-// console.table(tmpArrPrg[1].page);
+
+// console.table(tmpArrPrg);
+
 LangReader.loadProgramText(tmpArrPrg); // "Compiler" napravi array i langreader ga ucita
 
 
-// LangReader.loadProgramText();
-// console.log(LangReader.readCurrentCommand());
-// console.table(LangReader.progTextMatrix);
 
 TextDisplayMatrix.loadProgramText(LangReader.progTextMatrix);
 
-// console.table(TextDisplayMatrix.content);
 
-// LangReader.loadProgramText(pt)
-
-
-console.table();
-
-console.table();
 
 initCanvas();
 

@@ -10,6 +10,28 @@ let controls;
 THREE.Cache.enabled = true;
 
 
+let progText = `
+NEW 
+RDW NOP RLF NOP RLF NOP NOP NOP NOP STP
+NOP NOP RUP NOP SOA PEA RLF STP
+RRT NOP CAZ PUP NEA ADA RUP RUP NOP STP
+
+NEW
+NOP NOP NOP NOP RRT OIB STP
+NOP STP
+STO OIA NEA RLF STP
+NEW
+NOP NOP NOP NOP CBZ STP
+NEW
+NOP NOP NOP NOP RRT OIA STP
+NEW
+NOP NOP NOP NOP CAZ STP
+
+STR 
+NEA IIA NOP IIB PDW STP
+END`;
+
+
 // l col (1d arr)
 // j row (2d arr)
 // i pge (3d arr)
@@ -175,7 +197,7 @@ let TextDisplayMatrix = {
         for(let i = 0; i<this.content.length; i++) for(let j = 0; j<this.content[i].length; j++) for(let l = 0; l<this.content[i][j].length; l++) this.content[i][j][l] = this.commandTextToMeshHolder(progText[i][j][l],i,j,l);
 
         
-        console.table(this.content); 
+        // console.table(this.content); 
     },
 
     commandTextToMeshHolder: function(value,x,y,z){
@@ -269,6 +291,83 @@ let CurrentFont = {
 };
 
 
+//creates an array from text
+// Compiler.loadProgText(progText);
+// Compiler.CreateArrayFromProgramText();
+let Compiler = {
+
+    text : "",
+    currentCharPos : -1,
+    ROW_END : 'STP',
+    PAGE_BEGIN : 'NEW',
+    START_PAGE : 'STR',
+    END_OF_PROGRAM : 'END',
+    
+
+    loadProgText : function(text){
+        this.text = text;
+    },
+
+    //OK
+    getNextChar : function() {
+        this.currentCharPos = this.currentCharPos + 1;
+        return (this.text.length-1) < this.currentCharPos ? this.END_OF_PROGRAM : this.text.charAt(this.currentCharPos);
+    },
+
+    //OK
+    getNextValidChar : function(){
+        let tmpC = this.getNextChar();
+        if(tmpC.match(/[A-Z]/)) return tmpC;
+        else return this.getNextValidChar();
+    },
+
+    //OK
+    getNextCommand : function(){ return (this.getNextValidChar() + this.getNextValidChar() + this.getNextValidChar()); },
+
+    //OK
+    getNextRow : function() {
+        let tmpCmd = this.getNextCommand();
+        let cmdArray = [];
+
+        while(tmpCmd != this.ROW_END && tmpCmd != this.PAGE_BEGIN  && tmpCmd != this.START_PAGE && tmpCmd != this.END_OF_PROGRAM){
+            cmdArray.push(tmpCmd);
+            tmpCmd = this.getNextCommand();
+        };
+
+        cmdArray.push(this.ROW_END);
+        return {type : tmpCmd, row : cmdArray};
+    },
+
+    getNextPage : function(){
+        let tmpCmd = this.getNextRow();
+        let cmdArray = [];
+
+        while(tmpCmd.type != this.PAGE_BEGIN  && tmpCmd.type != this.START_PAGE && tmpCmd.type != this.END_OF_PROGRAM){
+            cmdArray.push(tmpCmd.row);
+            tmpCmd = this.getNextRow();
+        }
+        
+        return {type : tmpCmd.type, page : cmdArray};
+    },
+
+    //OK
+    CreateArrayFromProgramText : function(){
+        let tmpPage = this.getNextPage();
+        let tmpType = tmpPage.type;
+        let book = [];
+
+        while(tmpType != this.END_OF_PROGRAM){
+            tmpPage = this.getNextPage();
+            book.push({id : tmpType, page: tmpPage.page});
+            tmpType = tmpPage.type;
+        }
+
+        // console.table(book);
+        return book;
+    },
+};
+
+
 
     /////////////////
     // Global Vars //
@@ -342,11 +441,17 @@ loadFont(CurrentFont);
 
 LangReader.loadProgramText();
 // console.log(LangReader.readCurrentCommand());
-// console.table(LangReader.progTextMatrix);
+console.table(LangReader.progTextMatrix);
 
 TextDisplayMatrix.loadProgramText(LangReader.progTextMatrix);
 
+// console.table(TextDisplayMatrix.content);
 
+
+Compiler.loadProgText(progText);
+
+
+console.table(Compiler.CreateArrayFromProgramText());
 
 initCanvas();
 
@@ -403,7 +508,7 @@ function animate() {
 
         let atts = new TextDisplayController().Init();
 
-        console.log('wdwdwd');
+        console.log('OK');
 
     }
 

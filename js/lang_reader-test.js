@@ -19,10 +19,21 @@ STR
 NEA IIA NOP IIB PDW STP
 END`;
 
+let progText2 = `
+NEW
+STO STP
+STR
+PUP NOP RRT NOP NOP NOP RRT CAZ PUP OIA SOA RDW STP 
+RRT NOP RUP NOP NOP NOP RUP NOP NOP NOP NOP RLF STP
+NEW
+RRT AOA AOA AOA AOA AOA NEB RDW RDW STP
+PDW AOA AOA AOA AOA AOA NOP RLF RRT OIB STO STP
+END
 
+`
 
-
-let LangReader = {
+//creates an array from text
+let Compiler = {
 
     text : "",
     currentCharPos : -1,
@@ -32,8 +43,9 @@ let LangReader = {
     END_OF_PROGRAM : 'END',
     
 
-    rowTypeHelper : '', //to remember the type
-    rowTypeHelperFlg : false,  
+    loadProgText : function(text){
+        this.text = text;
+    },
 
     //OK
     getNextChar : function() {
@@ -53,16 +65,7 @@ let LangReader = {
 
     //OK
     getNextRow : function() {
-        //tu se stvori data.push({label: lab[i], value: val[i]}) sa XYZ ? ili kasnije ?
-        // let tmpType;
-        // let nxtCmd = this.getNextCommand();
-
-        // if(this.rowTypeHelper == '') tmpType = nxtCmd;
-        // else tmpType = this.rowTypeHelper;
-
-        // let tmpCmd = nxtCmd;
         let tmpCmd = this.getNextCommand();
-        // let tmpType = tmpCmd;
         let cmdArray = [];
 
         while(tmpCmd != this.ROW_END && tmpCmd != this.PAGE_BEGIN  && tmpCmd != this.START_PAGE && tmpCmd != this.END_OF_PROGRAM){
@@ -70,12 +73,8 @@ let LangReader = {
             tmpCmd = this.getNextCommand();
         };
 
-        // this.rowTypeHelper = tmpCmd;
-
         cmdArray.push(this.ROW_END);
-        // return {type : tmpType, row : cmdArray};
         return {type : tmpCmd, row : cmdArray};
-        // return {type : tmpCmd, row : cmdArray, typeFront : tmpType};
     },
 
     getNextPage : function(){
@@ -88,7 +87,6 @@ let LangReader = {
         }
         
         return {type : tmpCmd.type, page : cmdArray};
-        // return {type : tmpCmd.type, row : cmdArray,  typeFront : tmpCmd.typeFront};
     },
 
     //OK
@@ -103,22 +101,12 @@ let LangReader = {
             tmpType = tmpPage.type;
         }
 
-        console.log('book :', book);
-        // console.log(this.getNextCommand());
+        console.table(book);
+        return book;
     },
 }
 
 
 
-LangReader.text = progText;
-// LangReader.CreateArrayFromProgramText();
-LangReader.CreateArrayFromProgramText();
-// for(let i = 0 ; i < 20; i++) {
-// //     // let tmpC = LangReader.getNextChar()
-// //     // if(tmpC.match(/[A-Z]/))console.log("Char : " + tmpC + " Char : " + tmpC.match(/[A-Z]/));
-// //     // console.log(' LangReader.getNextValidChar() :',  LangReader.getNextValidChar()  );
-//     let sc = LangReader.getNextPage();
-//     console.table('getNextPage :', sc);
-//     if(sc.type == 'END' ) break;
-//     // if(sc.type == 'STR' ) break;
-// }
+// Compiler.loadProgText(progText2);
+// Compiler.CreateArrayFromProgramText();

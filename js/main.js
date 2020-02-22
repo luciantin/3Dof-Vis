@@ -9,6 +9,18 @@ let controls;
 // Bitno za nesto
 THREE.Cache.enabled = true;
 
+let progText2 = `
+NEW 
+NOP NOP NOP STP
+NOP NOP NOP STP
+NOP NOP NOP STP
+NEW
+IIA IIA IIA STP
+IIA IIA IIA STP
+STR
+IIB IIB IIB STP
+END
+`
 
 let progText = `
 NEW 
@@ -32,7 +44,7 @@ NEA IIA NOP IIB PDW STP
 END`;
 
 
-// l col (1d arr)
+// l col (1d arr) 
 // j row (2d arr)
 // i pge (3d arr)
 let vanillaProgTextMatrix = [
@@ -99,8 +111,8 @@ class TextDisplayController {
                     let rotation = TextDisplayMatrix.content[i][j][l].rotation;
 
                     TextDisplayMatrix.content[i][j][l].mesh = makeTextMesh(CurrentFont,value,
-                        l*100,j*100,i*100
-                        ,TextMaterials[0])
+                        j*100,i*100,l*100
+                        ,TextMaterials[1])
                     
                     scene.add(TextDisplayMatrix.content[i][j][l].mesh);
 
@@ -224,24 +236,25 @@ let LangReader = {
     // 3Dof Program text
     progTextMatrix : [],
 
-    //z - page , x - col , y - row
-    progTextMatrixSize  : { x:0, y:0, z:0},  
-    progTextMatrixStart : { x:0, y:0, z:0},  
-    progTextMatrixCrnt  : { x:0, y:0, z:0},  
+    //z - page , y - row , x - elem 
+    // progTextMatrixSize  : { x:0, y:0, z:0},  
+    progTextMatrixStart : { x:0, y:0, z:0},  //pocetna
+    progTextMatrixCrnt  : { x:0, y:0, z:0},  //trenutna 
 
     //Load Program text from WebPage to progTextMatrix
-    loadProgramText : function(){
+    loadProgramText : function(Text){
 
         //TODO load prog text
-        this.progTextMatrix = vanillaProgTextMatrix2;
 
-        this.progTextMatrixSize.x = 3;
-        this.progTextMatrixSize.y = 3;
-        this.progTextMatrixSize.z = 3;
+        for(let i = 0; i < Text.length; i++){
+            this.progTextMatrix.push(Text[i].page);
+            if(Text[i].id = 'STR') this.progTextMatrixStart.z = i;
+        }
+
+        // this.progTextMatrix = Text;
 
         this.progTextMatrixStart.x = 0;
         this.progTextMatrixStart.y = 0;
-        this.progTextMatrixStart.z = 0;
 
         this.progTextMatrixCrnt = this.progTextMatrixStart;
         
@@ -352,6 +365,7 @@ let Compiler = {
 
     //OK
     CreateArrayFromProgramText : function(){
+        this.currentCharPos = -1;
         let tmpPage = this.getNextPage();
         let tmpType = tmpPage.type;
         let book = [];
@@ -439,19 +453,29 @@ let TextMaterials = [
 
 loadFont(CurrentFont);
 
-LangReader.loadProgramText();
+
+
+Compiler.loadProgText(progText2); // ucita tekst sa ekrana TODO
+let tmpArrPrg = Compiler.CreateArrayFromProgramText();
+console.table(tmpArrPrg);
+// console.table(tmpArrPrg[1].page);
+LangReader.loadProgramText(tmpArrPrg); // "Compiler" napravi array i langreader ga ucita
+
+
+// LangReader.loadProgramText();
 // console.log(LangReader.readCurrentCommand());
-console.table(LangReader.progTextMatrix);
+// console.table(LangReader.progTextMatrix);
 
 TextDisplayMatrix.loadProgramText(LangReader.progTextMatrix);
 
 // console.table(TextDisplayMatrix.content);
 
+// LangReader.loadProgramText(pt)
 
-Compiler.loadProgText(progText);
 
+console.table();
 
-console.table(Compiler.CreateArrayFromProgramText());
+console.table();
 
 initCanvas();
 

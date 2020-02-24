@@ -18,7 +18,7 @@
     --bg-color-dark: #333;
     --bg-color-mid: #666;
     --bg-color-light: #999;
-    --bg-color-primary: #009;
+    --bg-color-primary: #aaa;
     --bg-color-secondary: #900;
     --bg-color-tertiary: #090;
 
@@ -137,11 +137,25 @@ a { text-decoration: none;}
 
 .container-flex{ display: flex;}
 
+.container-flex-center{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+}
+
+
 .container-center{ 
     margin: auto; 
     max-width: 70%;
 }
 
+
+.fill-parent{    
+    width: 100%;
+    height: 100%;
+}
 
 /* Button */
 

@@ -47,46 +47,11 @@ END`;
 // l col (1d arr) 
 // j row (2d arr)
 // i pge (3d arr)
-let vanillaProgTextMatrix = [
 
-    [['1','A','B'],
-     ['2','NOP','NOP'],
-     ['3','NOP','NOP'],],
 
-    [['NOP','NOP','NOP'],
-     ['NOP','NOP','NOP'],
-     ['NOP','NOP','NOP'],],
 
-    [['NOP','NOP','NOP'],
-     ['NOP','NOP','NOP'],
-     ['NOP','NOP','NOP'],]
 
-]
 
-let vanillaProgTextMatrix2 = [
-
-    [
-        ['7','8','9','A','b'],
-        ['7','8','9','A','b'],
-        ['7','8','9','A','b'],
-        ['7','8','9','A','b'],
-],
-    [
-        ['7','8','9','A','b'],
-        ['7','8','9','A','b'],
-        ['7','8','9','A','b'],
-        ['7','8','9','A','b'],
-],
-
-    [['11','12','13'],
-     ['14','15','16'],
-     ['17','18','19'],],
-
-    [['NOP','NOP','NOP'],
-     ['NOP','NOP','NOP'],
-     ['NOP','NOP','NOP'],]
-
-]
 
 
 
@@ -102,6 +67,7 @@ visMenuTextArea.value = progText;
 class TextDisplayController {
 
     constructor(){
+        this.meshId = 1;
         this.textDirection = 3;
         this.textDirections = [ 'Front2Back', 'Back2Front', 'Left2Right', 'Top2Bottom', 'Bottom2Top'];
         this.content = 0;
@@ -169,7 +135,7 @@ class TextDisplayController {
 
                         this.content[i][j][l].mesh =   makeTextMesh(this.CurrentFont,value,
                                                                     x,y,z
-                                                                    ,TextMaterials[1])
+                                                                    ,TextMaterials[this.meshId])
                         
                         scene.add(this.content[i][j][l].mesh);
     
@@ -505,6 +471,11 @@ let TextMaterials = [
     new THREE.MeshNormalMaterial()
 ]
 
+let TextMaterialNames = [
+    'Neon Green',
+    'Basic'
+]
+
 
 ///////////////////////////
 ///////////////////////////
@@ -516,6 +487,7 @@ let DisplayControler = new TextDisplayController();
 
 loadFont(DisplayControler.CurrentFont);
 
+loadHtmlMenu(DisplayControler);
 
 initCanvas();
 
@@ -717,35 +689,99 @@ function makeTextGeo(FontObject,TextString){
 
 
 
+
+
+//SIDEBAR
+let visMenuHTML = document.querySelector('.visualizer-menu');
+
+//buttons
+let visMenuBtnHideHTML = document.getElementById('vis-menu-btn-hide');
+let visMenuBtnTextHTML = document.getElementById('vis-menu-btn-text');
+let visMenuBtnSettingsHTML = document.getElementById('vis-menu-btn-settings');
+let visMenuBtnDisplayHTML = document.getElementById('vis-menu-btn-display');
+
+//input 
+let visMenuTextDir = document.getElementById('vis-dis-text-dir');
+let visMenuFontSize = document.getElementById('vis-dis-fontSize');
+let visMenuMesh = document.getElementById('vis-dis-mesh');
+
+
+//content
+let visMenuTextHTML     = document.querySelector('#vis-text-input');
+let visMenuSettingsHTML = document.querySelector('#vis-settings'); 
+let visMenuDisplayHTML  = document.querySelector('#vis-display');
+
+
+//PROG CNTRL
+let progControlHTML = document.querySelector('.prog-control');
+let progCntrlToggleVisHTML = document.getElementById('prog-control-btn-toggle-visibility');
+
+//HEADER
+let headerShowSidebarHTML = document.getElementById('header-show-sidebar');
+let headerMainHTML = document.getElementById('header-main');
+
+
+
+//fills dropdown menus
+function loadHtmlMenu(TxtDisCntrl){
+
+    let fontListHTML          = ""  ;
+    let meshListHTML          = ""  ;
+    // let fontSizeListHTML      = ""  ; nije lista
+    let textDirectionListHTML = ""  ;
+
+    for(let i = 0; i<TxtDisCntrl.textDirections.length; i++) textDirectionListHTML += `<option value="${i}">${TxtDisCntrl.textDirections[i]}</option> `;
+    for(let i = 0; i<TxtDisCntrl.CurrentFont.fontMap.length; i++) fontListHTML += `<option value="${i}">${TxtDisCntrl.CurrentFont.fontMap[i]}</option> `;
+    for(let i = 0; i<TextMaterialNames.length; i++) meshListHTML += `<option value="${i}">${TextMaterialNames[i]}</option> `;
+
+    document.getElementById('vis-dis-font').innerHTML = fontListHTML;
+    document.getElementById('vis-dis-text-dir').innerHTML = textDirectionListHTML;
+    document.getElementById('vis-dis-mesh').innerHTML = meshListHTML;
+    
+    // let tmpOption = '<option>'    ;
+
+}
+
+
 // Hide Menu Button 
 
-let visMenu = document.querySelector('.visualizer-menu');
-let visMenuBtnHide = document.getElementById('vis-menu-btn-hide');
-let progCntrlToggleVis = document.getElementById('prog-control-btn-toggle-visibility');
-let headerShowSidebar = document.getElementById('header-show-sidebar');
-let headerMain = document.getElementById('header-main');
+visMenuBtnHideHTML.addEventListener('click',ToggleMenuVisibility);
+headerShowSidebarHTML.addEventListener('click',ToggleMenuVisibility);
 
+progCntrlToggleVisHTML.addEventListener('click',ToggleVisAll);
 
-visMenuBtnHide.addEventListener('click',ToggleMenuVisibility);
-headerShowSidebar.addEventListener('click',ToggleMenuVisibility);
-
-progCntrlToggleVis.addEventListener('click',ToggleVisAll);
 
 function ToggleMenuVisibility() { 
-    visMenu.classList.toggle("hide"); 
-    headerShowSidebar.classList.toggle("visibility-no"); 
-
+    visMenuHTML.classList.toggle("hide"); 
+    headerShowSidebarHTML.classList.toggle("visibility-no");     
 }
 
+
+//progControlHTML
 function ToggleVisAll() { 
-    visMenu.classList.toggle("hide"); 
-    headerMain.classList.toggle("hide"); 
-    headerShowSidebar.classList.toggle("visibility-no"); 
+
+    if(!headerMainHTML.classList.contains('hide')){
+
+        // progControlHTML.classList.add('visibility-no');
+
+        progCntrlToggleVisHTML.innerHTML = "Show All";
+
+        headerMainHTML.classList.add("hide"); 
+        if(!visMenuHTML.classList.contains('hide')) visMenuHTML.classList.add("hide"); 
+        if(!headerShowSidebarHTML.classList.contains('visibility-no')) headerShowSidebarHTML.classList.add("visibility-no"); 
+    }
+    else{
+
+        // progControlHTML.classList.remove('visibility-no');
+
+        progCntrlToggleVisHTML.innerHTML = "Hide All";
+
+        headerMainHTML.classList.remove("hide"); 
+        visMenuHTML.classList.remove("hide"); 
+        headerShowSidebarHTML.classList.add("visibility-no"); 
+    }   
 
 }
-
-//SHOULD_TEXT_MATRIX_BE_LOADED
-
 
 
 /////////////////////////////////////////
@@ -758,8 +794,21 @@ function ToggleVisAll() {
 ////////     Program Control    /////////
 /////////////////////////////////////////
 
-// Load
+// Visibility on Hover when header hidden
 
+
+// progControlHTML.addEventListener('mouseenter',function(){
+//     if(visMenuHTML.classList.contains('hide')) progControlHTML.classList.remove('visibility-no');
+//     console.log('Test :');
+// });
+// progControlHTML.addEventListener('mouseleave',function(){
+//     if(visMenuHTML.classList.contains('hide')) progControlHTML.classList.add('visibility-no');
+//     console.log('Test2 :');
+// });
+
+
+
+// Load
 let progCntrlLoad = document.getElementById('prog-control-btn-load');
 
 progCntrlLoad.addEventListener('click', LoadProgFromTextArea);
@@ -769,17 +818,61 @@ function LoadProgFromTextArea(){
 } 
 
 /////////////////////////////////////////
-////////        Vis Menu        /////////
+////////    Side (Vis) Menu     /////////
 /////////////////////////////////////////
 
 
+// let visMenuBtnTextHTML = document.getElementById('vis-menu-btn-text');
+// let visMenuBtnSettingsHTML = document.getElementById('vis-menu-btn-settings');
+// let visMenuBtnDisplayHTML = document.getElementById('vis-menu-btn-display');
+
+visMenuBtnTextHTML.addEventListener('click',ToggleVisText);
+visMenuBtnSettingsHTML.addEventListener('click',ToggleVisSettings);
+visMenuBtnDisplayHTML.addEventListener('click',ToggleVisDisplay);
+
+//visMenuTextHTML
+
+function ToggleVisText(){
+    visMenuTextHTML.classList.remove('hide');
+    visMenuSettingsHTML.classList.add('hide');
+    visMenuDisplayHTML.classList.add('hide');
+}
+
+function ToggleVisSettings(){
+    visMenuSettingsHTML.classList.remove('hide');
+    visMenuTextHTML.classList.add('hide');
+    visMenuDisplayHTML.classList.add('hide');
+}
+
+function ToggleVisDisplay(){
+    visMenuDisplayHTML.classList.remove('hide');
+    visMenuSettingsHTML.classList.add('hide');
+    visMenuTextHTML.classList.add('hide');
+}
 
 
+//change dir
+visMenuTextDir.addEventListener('focus',function(){ this.selectedIndex = -1;});
+visMenuTextDir.addEventListener('change',function(){ 
+    let tmp = document.getElementById('vis-dis-text-dir');
+    DisplayControler.textDirection = tmp.options[tmp.selectedIndex].value;
+    console.log('DisplayControler.textDirection  :', DisplayControler.textDirection );
+    SHOULD_TEXT_MATRIX_BE_LOADED = true;
+});
 
+//change dir
+visMenuMesh.addEventListener('focus',function(){ this.selectedIndex = -1;});
+visMenuMesh.addEventListener('change',function(){ 
+    let tmp = document.getElementById('vis-dis-mesh');
+    DisplayControler.meshId = tmp.options[tmp.selectedIndex].value;
+    console.log('DisplayControler.textDirection  :', DisplayControler.meshId );
+    SHOULD_TEXT_MATRIX_BE_LOADED = true;
+});
 
-
-
-
-
-
-
+//Font Size
+visMenuFontSize.addEventListener('change',function(){ 
+    let tmp = document.getElementById('vis-dis-fontSize');
+    DisplayControler.CurrentFont.size = tmp.value;
+    console.log('DisplayControler.textDirection  :', DisplayControler.CurrentFont.size );
+    SHOULD_TEXT_MATRIX_BE_LOADED = true;
+});

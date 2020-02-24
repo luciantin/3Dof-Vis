@@ -57,14 +57,32 @@
                 <a href="#" class="btn txt-font-size-medium txt-light px-2" id="vis-menu-btn-hide">Hide</a>
             </div>
 
-            <div class="vis-menu-content">
+            <div class="vis-menu-content fill-parent ">
                 <!-- <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur qui animi accusantium perferendis minus odit officia quae velit corporis placeat ratione esse rerum vero eos, eaque, aliquam ullam harum expedita.</p> -->
-                <textarea name="" id="vis-text-input" cols="30" rows="10" ></textarea>
+                <textarea name="" id="vis-text-input" cols="30" rows="10" class="fill-parent hide" ></textarea>
 
-                <div id="vis-settings">
+                <div id="vis-settings" class="fill-parent bg-primary container-flex-center hide">
+                    <label for="hideCommands" class=" txt-font-size-medium px-2">Hide Commands  </label>
+                    <input type="text" name="hideCommands" id="hideCommands" placeholder="List of Commands divided by ,">
                 </div>
 
-                <div class="vis-display">
+                <div id="vis-display" class="fill-parent bg-primary container-flex-center ">
+                    <div class=" m-3">
+                        <label for="vis-dis-font" class=" txt-font-size-medium px-2">Font </label>
+                        <select name="vis-dis-font" id="vis-dis-font"></select>
+                    </div>
+                    <div class=" m-3">                    
+                        <label for="vis-dis-text-dir" class=" txt-font-size-medium px-2">Text Direction</label>
+                        <select name="vis-dis-text-dir" id="vis-dis-text-dir"></select>
+                    </div>
+                    <div class=" m-3">
+                        <label for="vis-dis-mesh" class=" txt-font-size-medium px-2">Mesh </label>
+                        <select name="vis-dis-mesh" id="vis-dis-mesh"></select>                    
+                    </div>      
+                    <div class=" m-3">
+                        <label for="vis-dis-fontSize" class=" txt-font-size-medium px-2">Font Size </label>
+                        <input type="text" name="vis-dis-fontSize" id="vis-dis-fontSize" placeholder="30">
+                    </div>              
                 </div>
             </div>
             

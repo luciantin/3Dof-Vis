@@ -25,7 +25,7 @@ END
 let progText = `
 NEW 
 RDW NOP RLF NOP RLF NOP NOP NOP NOP STP
-NOP NOP RUP NOP SOA PEA RLF STP
+NOP NOP RUP OIA SOA PEA RLF STP
 RRT NOP CAZ PUP NEA ADA RUP RUP NOP STP
 
 NEW
@@ -352,10 +352,57 @@ class LangReader {
         // 3Dof Program text
         this.content = [];
 
+        this.incrVal = 1;
+        
         this.direction = 'RRT';
-        this.pntrA = 0;
-        this.pntrB = 0;
-        this.pntrC = 0;
+
+        this.progMemory = {
+
+            Memory : [0,0,0,0,0,0,0,0,0,0,0,0,0],
+            pntr : [0,0,0],
+
+            resizeMem : function(pntrId, sign){
+                
+                if(sign == 'incr') this.pntr[pntrId]++;        
+                if(sign == 'decr') this.pntr[pntrId]--;
+                
+                if(this.pntr[pntrId] < 0){
+                    for(let i = 0; i < this.pntr.length; i++) if(i != pntrId) this.pntr[i]++;
+                    this.Memory = [0] + this.Memory; 
+                }
+            
+                if(this.pntr[pntrId] > this.Memory.length){ this.Memory = this.Memory + [0]; }
+                
+            },
+
+            swapAB : function(){
+                let tmp = this.getA();
+                this.setA(this.getB());
+                this.setB(tmp);
+            },
+            
+            setA : function(num){ this.Memory[this.pntr[0]] = num; console.log("testtest A");},
+            setB : function(num){ this.Memory[this.pntr[1]] = num; console.log("testtest B");},
+            setC : function(num){ this.Memory[this.pntr[2]] = num; },
+            
+            getA : function(){ return this.Memory[this.pntr[0]]; },
+            getB : function(){ return this.Memory[this.pntr[1]]; },
+            getC : function(){ return this.Memory[this.pntr[2]]; },
+
+            incrA : function(){ this.resizeMem(0,'incr'); },
+            incrB : function(){ this.resizeMem(1,'incr'); },
+            incrC : function(){ this.resizeMem(2,'incr'); },
+
+            decrA : function(){ this.resizeMem(0,'decr'); },
+            decrB : function(){ this.resizeMem(1,'decr'); },
+            decrC : function(){ this.resizeMem(2,'decr'); },
+
+            logMemory : function(){
+                console.log('this.progMemory :', this.Memory);
+                console.log('pntr > ',this.pntr);
+            },
+            
+        };
 
         //z - page , y - row , x - elem 
         // progTextMatrixSize  = { x:0, y:0, z:0},  
@@ -399,13 +446,14 @@ class LangReader {
 
     //pomakne program za jedan korak
     step(){
-        if(this.direction == 'RUP')      this.progTextMatrixCrnt.y += 1;
-        else if(this.direction == 'RDW') this.progTextMatrixCrnt.y -= 1;
-        else if(this.direction == 'RRT') this.progTextMatrixCrnt.x += 1;
-        else if(this.direction == 'RLF') this.progTextMatrixCrnt.x -= 1;
-        else if(this.direction == 'PUP') this.progTextMatrixCrnt.z += 1;
-        else if(this.direction == 'PDW') this.progTextMatrixCrnt.z -= 1;
-        else if(this.direction == 'STOP') console.log('Stop');
+        if(this.direction == 'RUP')      this.progTextMatrixCrnt.y -= this.incrVal;
+        if(this.direction == 'RDW') this.progTextMatrixCrnt.y += this.incrVal;
+        if(this.direction == 'RRT') this.progTextMatrixCrnt.x += this.incrVal;
+        if(this.direction == 'RLF') this.progTextMatrixCrnt.x -= this.incrVal;
+        if(this.direction == 'PUP') this.progTextMatrixCrnt.z += this.incrVal;
+        if(this.direction == 'PDW') this.progTextMatrixCrnt.z -= this.incrVal;
+        if(this.direction == 'STOP') console.log('Stop');
+        this.incrVal = 1;
     };
 
 
@@ -414,51 +462,72 @@ class LangReader {
         // console.log('command :', command);
         //ostalo
         if(command == 'NOP') this.nopCntr++;
-        else if(command == 'STO') this.direction = 'STOP';
-        else if(command == 'STP') this.direction = 'STOP';
+        if(command == 'STO') this.direction = 'STOP';
+        if(command == 'STP') this.direction = 'STOP';
         
         //direction
-        else if(command == 'RUP') this.direction = 'RUP';
-        else if(command == 'RDW') this.direction = 'RDW';
-        else if(command == 'RLF') this.direction = 'RLF';
-        else if(command == 'RRT') this.direction = 'RRT';
-        else if(command == 'PUP') this.direction = 'PUP';
-        else if(command == 'PDW') this.direction = 'PDW';
+        if(command == 'RUP') this.direction = 'RUP';
+        if(command == 'RDW') this.direction = 'RDW';
+        if(command == 'RLF') this.direction = 'RLF';
+        if(command == 'RRT') this.direction = 'RRT';
+        if(command == 'PUP') this.direction = 'PUP';
+        if(command == 'PDW') this.direction = 'PDW';
 
         //memory
-        else if(command == 'CPA') return;
-        else if(command == 'CPB') return;
-        else if(command == 'SWP') return;
-        else if(command == 'NEA') return;
-        else if(command == 'PEA') return;
-        else if(command == 'NEB') return;
-        else if(command == 'PEB') return;
+        if(command == 'CPA') this.progMemory.setA(this.progMemory.getB());
+        if(command == 'CPB') this.progMemory.setB(this.progMemory.getA());
+        if(command == 'SWP') this.progMemory.swapAB();
+        if(command == 'NEA') this.progMemory.incrA();
+        if(command == 'PEA') this.progMemory.decrA();
+        if(command == 'NEB') this.progMemory.incrB();
+        if(command == 'PEB') this.progMemory.decrB();
 
 
         //flow control
-        else if(command == 'CAZ') return;
-        else if(command == 'CBZ') return;
-        else if(command == 'CAL') return;
-        else if(command == 'CBL') return;
-        else if(command == 'CIE') return;
+        if(command == 'CAZ') if(this.progMemory.getA() != 0) this.incrVal = 2;
+        if(command == 'CBZ') {if(this.progMemory.getB() != 0) this.incrVal = 2; console.log( ' B != 0 TRUE');}
+        if(command == 'CAL') if(this.progMemory.getA() <  this.progMemory.getB()) this.incrVal = 2;
+        if(command == 'CBL') if(this.progMemory.getB() <  this.progMemory.getA()) this.incrVal = 2;
+        if(command == 'CIE') if(this.progMemory.getA() != this.progMemory.getB()) this.incrVal = 2;
 
         //combination A
-        else if(command == 'REA') return;
-        else if(command == 'ADA') return;
-        else if(command == 'AOA') return;
-        else if(command == 'SBA') return;
-        else if(command == 'SOA') return;
+        if(command == 'REA') this.progMemory.setA(0);
+        if(command == 'ADA') this.progMemory.setA(this.progMemory.getA() + this.progMemory.getB());
+        if(command == 'AOA') this.progMemory.setA(this.progMemory.getA() + 1);
+        if(command == 'SBA') this.progMemory.setA(this.progMemory.getA() - this.progMemory.getB());
+        if(command == 'SOA') this.progMemory.setA(this.progMemory.getA() - 1);
 
         //combination B
-        else if(command == 'REB') return;
-        else if(command == 'ADB') return;
-        else if(command == 'AOB') return;
-        else if(command == 'SAB') return;
-        else if(command == 'SOB') return;
+        if(command == 'REB') this.progMemory.setB(0);
+        if(command == 'ADB') this.progMemory.setB(this.progMemory.getB() + this.progMemory.getA());
+        if(command == 'AOB') this.progMemory.setB(this.progMemory.getB() + 1);
+        if(command == 'SAB') this.progMemory.setB(this.progMemory.getB() - this.progMemory.getA());
+        if(command == 'SOB') this.progMemory.setB(this.progMemory.getB() - 1);
 
-        console.log('Current Command = '+command);
-        console.log('Current Direction : ' + this.direction);
+        //I/O
+        if(command == 'OIA') terminalControler.output(this.progMemory.getA());
+        if(command == 'OIB') terminalControler.output(this.progMemory.getB());
+        if(command == 'IIA') this.progMemory.setA(10);
+        if(command == 'IIB') this.progMemory.setB(10);
+        if(command == 'OAA') return;
+        if(command == 'OAB') return;
+
+        console.log('-----------------------------------------------------------');
+        // if(command == 'IIA') console.log('command IIA');
+        // else if(command == 'IIB') console.log('command IIB');
+        // console.log('Current Command = '+command);
+        // console.log('Current Direction : ' + this.direction);
+        this.progMemory.logMemory();
+        // this.progMemory.Memory[this.progMemory.pntr[0]] = 10;
+        // this.progMemory.Memory[this.progMemory.pntr[1]] = 10;
+        // console.log(this.progMemory.Memory[this.progMemory.pntr[0]] );
+        console.log('A : ' + this.progMemory.getA() );
+        console.log('B : ' + this.progMemory.getB() );
+        console.log('Incr : '+this.incrVal );
+        // this.progMemory.setA(20);
     };
+
+    
 
     clear(){
         this.commandHistory = [];
@@ -482,6 +551,20 @@ class LangReader {
 // Object Literals
 
 /////////////////////////
+
+
+let terminalControler = {
+    terminalHTML : document.querySelector('.terminal'),
+
+    output : function(data){
+        this.terminalHTML.innerHTML += `<p class="txt-font-editor-2" style="color:#fff; font-size:4rem;">${data}</p>`;
+        this.terminalHTML.scrollTop = this.terminalHTML.scrollHeight;
+    },
+
+    input : function(){
+
+    }
+};
 
 
 //OK
@@ -652,6 +735,7 @@ let TextMaterialNames = [
 
 let ProgMaster = new MasterController();
 
+SHOULD_TEXT_MATRIX_BE_LOADED = true;
 
 initCanvas();
 
@@ -696,7 +780,7 @@ function initCanvas(){
 
 function animate() {
 
-    //resizeCanvasToDisplaySize();
+    // resizeCanvasToDisplaySize();
 
     requestAnimationFrame(animate);
 
@@ -726,24 +810,51 @@ function animate() {
 }
 
 
+//OK
+window.addEventListener( 'resize', resizeCanvasToDisplaySize, false );
+
+function resizeCanvasToDisplaySize() {
+    let canvas = document.getElementById("Visualizer-O-Matic-9000");
+    canvas.width  = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    renderer.setViewport(0, 0, canvas.clientWidth, canvas.clientHeight);
+    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.updateProjectionMatrix();
+  }
+
 // AUTO RESIZE CANVAS
 // TODO on resize call
-function resizeCanvasToDisplaySize() {
-    // look up the size the canvas is being displayed
+// function resizeCanvasToDisplaySize() {
+//     // look up the size the canvas is being displayed
 
-    const canvas = document.getElementById("Visualizer-O-Matic-9000");
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
+//     const canvas = document.getElementById("Visualizer-O-Matic-9000");
+//     const width = canvas.clientWidth;
+//     const height = canvas.clientHeight;
 
-    // adjust displayBuffer size to match
-    if (renderer.width !== width || renderer.height !== height) {
-        // you must pass false here or three.js sadly fights the browser
-        renderer.setSize(width, height, false);
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
-    }
-}
+//     // adjust displayBuffer size to match
+//     if (renderer.width !== width || renderer.height !== height) {
+//         // you must pass false here or three.js sadly fights the browser
+//         renderer.setSize(width, height, false);
+//         camera.aspect = width / height;
+//         camera.updateProjectionMatrix();
+//     }
+// }
 
+
+// window.addEventListener( 'resize', onWindowResize, false );
+
+// function onWindowResize(){
+
+//     let canvas = document.getElementById("Visualizer-O-Matic-9000");
+//     let width  = canvas.width;
+//     let height = canvas.height;
+
+//     camera.aspect = width / height;
+//     camera.updateProjectionMatrix();
+
+//     renderer.setSize(width, height,false);
+
+// }
 
 //OK - ucita font , sam obi trebalo promijeniti font path ako treba
 function loadFont(passedFontObject) {

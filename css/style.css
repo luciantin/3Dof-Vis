@@ -90,7 +90,24 @@ textarea {
     display:block;
 }
 
+.terminal{
+    width: 100%;
+    height: 20vh;
+    background-color: #000;
+    border: 1px #fff solid;
+    overflow: scroll;
+}
 
+.terminal-text{
+    background-color: #000;
+    color: #fff;
+}
+
+#terminal-input-text{
+    position: relative;
+    top: 0%;
+    left: 0%;
+}
 
 /* Footer */
 /* 

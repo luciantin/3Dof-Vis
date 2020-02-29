@@ -60,10 +60,95 @@ visMenuTextArea.value = progText;
 class MasterController{
 
 
-    // constructor(){
-    //     this.DisplayControler = new TextDisplayController();
-    //     this.
-    // }
+    constructor(){
+
+
+        this.DisplaySettings = {
+            meshId : 1,
+            textDirection : 3,
+            textDirections : [ 'Front2Back', 'Back2Front', 'Left2Right', 'Top2Bottom', 'Bottom2Top'],
+            CurrentFont : {
+                font: undefined, //Holds JSON font
+                height: 20,
+                size: 30,
+                hover: 30,
+                curveSegments: 4,
+                bevelThickness: 2,
+                bevelSize: 1.5,
+                weightMapValue: 0,
+                fontMapValue: 0,
+                bevelEnabled: true,
+                fontLoaded: false,
+                weightMap: ["regular", "bold"],
+                fontMap: [ "helvetiker","optimer","gentilis","droid/droid_sans","droid/droid_serif"]
+            }
+        };
+
+        this.previousCommand = undefined;
+        this.currentCommand = undefined;
+
+        this.TextDisplay = undefined;
+        this.LangReader  = undefined;
+
+        this.group = new THREE.Group();
+
+        // loadFont(this.TextDisplay.CurrentFont);
+        loadFont(this.DisplaySettings.CurrentFont);
+        loadHtmlMenu(this.DisplaySettings);
+    }
+
+    Init(tmpArrPrg){
+
+        // this.LangReader.clear();
+        // this.TextDisplay.clear();
+
+        this.TextDisplay = new TextDisplayController();
+        this.LangReader = new LangReader();
+        this.previousCommand = undefined;
+        this.currentCommand = undefined;
+
+        this.TextDisplay.CurrentFont = this.DisplaySettings.CurrentFont;
+
+        this.TextDisplay.meshId = this.DisplaySettings.meshId;
+        this.TextDisplay.textDirection = this.DisplaySettings.textDirection;
+        this.TextDisplay.textDirections = this.DisplaySettings.textDirections;
+
+        this.LangReader.loadProgramText(tmpArrPrg);
+        this.group = this.TextDisplay.Init(this.LangReader.content)
+
+        // console.log('this.LangReader.readCurrentCommand :', this.LangReader.readCurrentCommand);
+        this.previousCommand = this.LangReader.readCurrentCommand();
+        this.TextDisplay.setMaterial(this.previousCommand, TextMaterials[0]); //first command
+
+        scene.add(this.group);
+    }
+
+    clear(){
+        this.previousCommand = undefined;
+        this.currentCommand = undefined;
+
+        this.TextDisplay = new TextDisplayController();
+        this.LangReader = new LangReader();
+
+        scene.remove(this.group);
+        this.group = new THREE.Group();
+    }
+
+
+    step(){
+        this.currentCommand = this.LangReader.readCurrentCommand();
+
+        this.LangReader.evalCommand(this.currentCommand.value);
+        this.LangReader.step();
+
+        // console.log(this.currentCommand);
+        // console.log(this.previousCommand);
+
+        this.TextDisplay.setMaterial(this.previousCommand, TextMaterials[1]);
+        this.TextDisplay.setMaterial(this.currentCommand, TextMaterials[0]);
+
+        this.previousCommand = this.currentCommand;        
+    }
 
 
 
@@ -95,65 +180,66 @@ class TextDisplayController {
         };
     };
 
+    //after program load
     Init(Text){
+
+        let txtGroup = new THREE.Group();
 
         this.loadProgramText(Text);
 
         for(let i = this.content.length - 1; i >= 0;i--){
-                for(let j = this.content[i].length - 1; j >= 0; j--){
-                    for(let l = this.content[i][j].length - 1; l >= 0;l--){
+            for(let j = this.content[i].length - 1; j >= 0; j--){
+                for(let l = this.content[i][j].length - 1; l >= 0;l--){
     
-                        //Get Values From Array 
-                        let value = this.content[i][j][l].value;
+                    //Get Values From Array 
+                    let value = this.content[i][j][l].value;
     
-                        let position = this.content[i][j][l].position;
-                        let scale = this.content[i][j][l].scale;
-                        let rotation = this.content[i][j][l].rotation;
-                        let x,y,z;
+                    let position = this.content[i][j][l].position;
+                    let scale = this.content[i][j][l].scale;
+                    let rotation = this.content[i][j][l].rotation;
+                    let x,y,z;
 
-                        //ok
-                        if(this.textDirections[this.textDirection] == 'Back2Front'){
-                            x = l * 100;
-                            y = j * 100; 
-                            z = i * 100;
-                        }
-
-                        //ok
-                        if(this.textDirections[this.textDirection] == 'Front2Back'){
-                            x = l * 100;
-                            y = j * 100; 
-                            z = (this.content.length - 1 - i ) * 100;
-                        }
-
-                        //ok
-                        if(this.textDirections[this.textDirection] == 'Top2Bottom'){
-                            x = l * 100;
-                            z = j * 100; 
-                            y = (this.content.length - 1 - i ) * 100;
-                        }
-
-                        //ok
-                        if(this.textDirections[this.textDirection] == 'Bottom2Top'){
-                            x = l * 100;
-                            z = j * 100; 
-                            y = i * 100;
-                        }
-
-
-                        this.content[i][j][l].mesh =   makeTextMesh(this.CurrentFont,value,
-                                                                    x,y,z
-                                                                    ,TextMaterials[this.meshId])
-                        
-                        scene.add(this.content[i][j][l].mesh);
-    
+                    //ok
+                    if(this.textDirections[this.textDirection] == 'Back2Front'){
+                        x = l * 100;
+                        y = j * 100; 
+                        z = i * 100;
                     }
+
+                    //ok
+                    if(this.textDirections[this.textDirection] == 'Front2Back'){
+                        x = l * 100;
+                        y = j * 100; 
+                        z = (this.content.length - 1 - i ) * 100;
+                    }
+
+                    //ok
+                    if(this.textDirections[this.textDirection] == 'Top2Bottom'){
+                        x = l * 100;
+                        z = j * 100; 
+                        y = (this.content.length - 1 - i ) * 100;
+                    }
+                     
+                    //ok
+                    if(this.textDirections[this.textDirection] == 'Bottom2Top'){
+                        x = l * 100;
+                        z = j * 100; 
+                        y = i * 100;
+                    }
+                
+                    this.content[i][j][l].mesh = makeTextMesh(this.CurrentFont,value,x,y,z,TextMaterials[this.meshId]);
+                    
+                    txtGroup.add(this.content[i][j][l].mesh);
                 }
             }
+        }
 
+        // scene.add(txtGroup);
+        return txtGroup;
     };
 
 
-    //First run this to fil the content
+    //First run this to fil the content with MeshHolder
     loadProgramText(progText){
     this.content = new Array(progText.length); //make pages
 
@@ -193,13 +279,16 @@ class TextDisplayController {
     };
 
 
+    // highlightCommand
+
+
     // clear(){}
 
     // refreshFull(){}
 
-    // setMaterial(value,index,Material){
-
-    // }
+    setMaterial(cmd,material){
+        this.content[cmd.z][cmd.y][cmd.x].mesh.material = material;
+    }
 
     // setTransform(value,index,position,scale,rotation){
     //     let tmpMatrix = new THREE.Matrix4().compose(
@@ -217,9 +306,9 @@ class TextDisplayController {
 class CommandHolder {
     constructor(value,px,py,pz){
         this.value = value;
-        this.px = px;
-        this.py = py;
-        this.pz = pz;
+        this.x = px;
+        this.y = py;
+        this.z = pz;
     }
 }
 
@@ -253,34 +342,30 @@ class MeshCommandHolder extends CoordinateHolder{
 }
 
 
-
-/////////////////////////
-
-// Object Literals
-
-
-
 // 3dof lang reader
-let LangReader = {
-   
-    //mozda, jednog dana
-    commandHistory : [],
-    nopCntr : 0,
-    // 3Dof Program text
-    content : [],
+class LangReader {
 
-    direction : 'RRT',
-    pntrA : 0,
-    pntrB : 0,
-    pntrC : 0,
+    constructor(){
+        //mozda, jednog dana
+        this.commandHistory = [];
+        this.nopCntr = 0;
+        // 3Dof Program text
+        this.content = [];
 
-    //z - page , y - row , x - elem 
-    // progTextMatrixSize  : { x:0, y:0, z:0},  
-    progTextMatrixStart : { x:0, y:0, z:0},  //pocetna
-    progTextMatrixCrnt  : { x:0, y:0, z:0},  //trenutna 
+        this.direction = 'RRT';
+        this.pntrA = 0;
+        this.pntrB = 0;
+        this.pntrC = 0;
+
+        //z - page , y - row , x - elem 
+        // progTextMatrixSize  = { x:0, y:0, z:0},  
+        this.progTextMatrixStart = { x:0, y:0, z:0};  //pocetna
+        this.progTextMatrixCrnt  = { x:0, y:0, z:0};  //trenutna 
+    
+    };
 
     //Load Program text from WebPage to content
-    loadProgramText : function(Text){
+    loadProgramText(Text){
 
         //TODO load prog text
 
@@ -296,12 +381,12 @@ let LangReader = {
 
         this.progTextMatrixCrnt = this.progTextMatrixStart;
         
-        console.log('Load Prog Text : OK');
-    },
+        console.log('Load Prog Text OK');
+    };
 
 
     //vrati kordinate trenutne naredbe,i naredbu
-    readCurrentCommand : function(){
+    readCurrentCommand(){
         let tmp_cmd = new CommandHolder(
             this.content[this.progTextMatrixCrnt.z][this.progTextMatrixCrnt.y][this.progTextMatrixCrnt.x],
             this.progTextMatrixCrnt.x,
@@ -309,36 +394,36 @@ let LangReader = {
             this.progTextMatrixCrnt.z
         );
         return tmp_cmd;
-    },
+    };
 
 
     //pomakne program za jedan korak
-    step : function(){
-        if(this.direction == 'RUP') this.progTextMatrixCrnt.y += 1;
+    step(){
+        if(this.direction == 'RUP')      this.progTextMatrixCrnt.y += 1;
         else if(this.direction == 'RDW') this.progTextMatrixCrnt.y -= 1;
-        else if(this.direction == 'RLF') this.progTextMatrixCrnt.x += 1;
-        else if(this.direction == 'RRT') this.progTextMatrixCrnt.x -= 1;
+        else if(this.direction == 'RRT') this.progTextMatrixCrnt.x += 1;
+        else if(this.direction == 'RLF') this.progTextMatrixCrnt.x -= 1;
         else if(this.direction == 'PUP') this.progTextMatrixCrnt.z += 1;
         else if(this.direction == 'PDW') this.progTextMatrixCrnt.z -= 1;
         else if(this.direction == 'STOP') console.log('Stop');
-    },
+    };
 
 
     //evaluira naredbu
-    evalCommand : function(command){
+    evalCommand(command){
+        // console.log('command :', command);
         //ostalo
-        if(command == 'NOP') nopCntr++;
-        else if(command == 'STO') this.direction == 'STOP';
-        else if(command == 'STP') this.direction == 'STOP';
+        if(command == 'NOP') this.nopCntr++;
+        else if(command == 'STO') this.direction = 'STOP';
+        else if(command == 'STP') this.direction = 'STOP';
         
         //direction
-        else if(command == 'RUP') this.direction == 'RUP';
-        else if(command == 'RDW') this.direction == 'RDW';
-        else if(command == 'RLF') this.direction == 'RLF';
-        else if(command == 'RRT') this.direction == 'RRT';
-        else if(command == 'PUP') this.direction == 'PUP';
-        else if(command == 'PDW') this.direction == 'PDW';
-        else if(command == 'PDW') this.direction == 'PDW';
+        else if(command == 'RUP') this.direction = 'RUP';
+        else if(command == 'RDW') this.direction = 'RDW';
+        else if(command == 'RLF') this.direction = 'RLF';
+        else if(command == 'RRT') this.direction = 'RRT';
+        else if(command == 'PUP') this.direction = 'PUP';
+        else if(command == 'PDW') this.direction = 'PDW';
 
         //memory
         else if(command == 'CPA') return;
@@ -371,17 +456,34 @@ let LangReader = {
         else if(command == 'SAB') return;
         else if(command == 'SOB') return;
 
-        console.load('Current Command : '+command);
-    },
+        console.log('Current Command = '+command);
+        console.log('Current Direction : ' + this.direction);
+    };
 
-    clear : function(){
+    clear(){
+        this.commandHistory = [];
+        this.nopCntr = 0;
         this.content = [];
-    },
+
+        this.direction = 'RRT';
+        this.pntrA = 0;
+        this.pntrB = 0;
+        this.pntrC = 0;
+ 
+        this.progTextMatrixStart = { x:0, y:0, z:0}; 
+        this.progTextMatrixCrnt  = { x:0, y:0, z:0};  
+    };
 
 };
 
 
- 
+/////////////////////////
+
+// Object Literals
+
+/////////////////////////
+
+
 //OK
 //creates an array from text
 // Compiler.loadProgText(progText);
@@ -545,11 +647,11 @@ let TextMaterialNames = [
 ///////////////////////////
 ///////////////////////////
 
-let DisplayControler = new TextDisplayController();
+// let DisplayControler = new TextDisplayController();
+// let LangReaderController = new LangReader();
 
-loadFont(DisplayControler.CurrentFont);
+let ProgMaster = new MasterController();
 
-loadHtmlMenu(DisplayControler);
 
 initCanvas();
 
@@ -601,7 +703,7 @@ function animate() {
     camera.lookAt(cameraTarget); 
 
     // font se ucitao pa se inita text 
-    if(DisplayControler.CurrentFont.fontLoaded == true && CAN_TEXT_MATRIX_BE_LOADED == false) CAN_TEXT_MATRIX_BE_LOADED = true;
+    if(ProgMaster.DisplaySettings.CurrentFont.fontLoaded == true && CAN_TEXT_MATRIX_BE_LOADED == false) CAN_TEXT_MATRIX_BE_LOADED = true;
     if(CAN_TEXT_MATRIX_BE_LOADED && SHOULD_TEXT_MATRIX_BE_LOADED){
         
         SHOULD_TEXT_MATRIX_BE_LOADED = false; //jer je ucitana
@@ -609,19 +711,10 @@ function animate() {
         Compiler.loadProgText(progTextArea.load().textContent);
         let tmpArrPrg = Compiler.CreateArrayFromProgramText();
 
-        // console.log('progTextArea.load().textContent :', progTextArea.load().textContent);
-        console.log('tmpArrPrg :', tmpArrPrg);
+        ProgMaster.clear();
+        ProgMaster.Init(tmpArrPrg);
 
-        LangReader.clear();
-        LangReader.loadProgramText(tmpArrPrg);
-        
-        DisplayControler.clear();
-        DisplayControler.Init(LangReader.content)
-        // console.log('LangReader.readCurrentCommand() :', LangReader.readCurrentCommand());
-
-
-        // console.log('OK');
-
+        console.log('Init OK');
     }
 
 
@@ -780,6 +873,13 @@ let visMenuDisplayHTML  = document.querySelector('#vis-display');
 let progControlHTML = document.querySelector('.prog-control');
 let progCntrlToggleVisHTML = document.getElementById('prog-control-btn-toggle-visibility');
 
+//buttons
+let progCntrlPlayHTML =  document.querySelector('#prog-control-btn-play');
+let progCntrlPauseHTML = document.querySelector('#prog-control-btn-pause');
+let progCntrlSpeedHTML = document.querySelector('#prog-control-btn-speed');
+let progCntrlStepHTML =  document.querySelector('#prog-control-btn-step');
+
+
 //HEADER
 let headerMainHTML = document.getElementById('header-main');
 
@@ -874,6 +974,10 @@ function ToggleVisAll() {
 // });
 
 
+//step
+progCntrlStepHTML.addEventListener('click',NextStep);
+
+function NextStep(){ ProgMaster.step(); }
 
 // Load
 let progCntrlLoad = document.getElementById('prog-control-btn-load');
@@ -922,8 +1026,8 @@ function ToggleVisDisplay(){
 visMenuTextDir.addEventListener('focus',function(){ this.selectedIndex = -1;});
 visMenuTextDir.addEventListener('change',function(){ 
     let tmp = document.getElementById('vis-dis-text-dir');
-    DisplayControler.textDirection = tmp.options[tmp.selectedIndex].value;
-    console.log('DisplayControler.textDirection  :', DisplayControler.textDirection );
+    ProgMaster.DisplaySettings.textDirection = tmp.options[tmp.selectedIndex].value;
+    // console.log('DisplayControler.textDirection  :', DisplayControler.textDirection );
     SHOULD_TEXT_MATRIX_BE_LOADED = true;
 });
 
@@ -931,16 +1035,16 @@ visMenuTextDir.addEventListener('change',function(){
 visMenuMesh.addEventListener('focus',function(){ this.selectedIndex = -1;});
 visMenuMesh.addEventListener('change',function(){ 
     let tmp = document.getElementById('vis-dis-mesh');
-    DisplayControler.meshId = tmp.options[tmp.selectedIndex].value;
-    console.log('DisplayControler.textDirection  :', DisplayControler.meshId );
+    ProgMaster.DisplaySettings.meshId = tmp.options[tmp.selectedIndex].value;
+    // console.log('DisplayControler.textDirection  :', DisplayControler.meshId );
     SHOULD_TEXT_MATRIX_BE_LOADED = true;
 });
 
 //Font Size
 visMenuFontSize.addEventListener('change',function(){ 
     let tmp = document.getElementById('vis-dis-fontSize');
-    DisplayControler.CurrentFont.size = tmp.value;
-    console.log('DisplayControler.textDirection  :', DisplayControler.CurrentFont.size );
+    ProgMaster.DisplaySettings.CurrentFont.size = tmp.value;
+    // console.log('DisplayControler.textDirection  :', DisplayControler.CurrentFont.size );
     SHOULD_TEXT_MATRIX_BE_LOADED = true;
 });
 

@@ -44,16 +44,10 @@ NEA IIA NOP IIB PDW STP
 END`;
 
 
-// l col (1d arr) 
-// j row (2d arr)
-// i pge (3d arr)
-
-
-
-
-
-
-
+// l col  (1d arr)  x
+// j row  (2d arr)  y
+// i pge  (3d arr)  z
+ 
 
 ////////////////////////////
 ///  Load Prog in TextArea
@@ -61,6 +55,19 @@ END`;
 
 let visMenuTextArea = document.getElementById('vis-text-input');
 visMenuTextArea.value = progText;
+
+
+class MasterController{
+
+
+    // constructor(){
+    //     this.DisplayControler = new TextDisplayController();
+    //     this.
+    // }
+
+
+
+}
 
 
 // Classes
@@ -258,9 +265,14 @@ let LangReader = {
    
     //mozda, jednog dana
     commandHistory : [],
-
+    nopCntr : 0,
     // 3Dof Program text
     content : [],
+
+    direction : 'RRT',
+    pntrA : 0,
+    pntrB : 0,
+    pntrC : 0,
 
     //z - page , y - row , x - elem 
     // progTextMatrixSize  : { x:0, y:0, z:0},  
@@ -287,11 +299,8 @@ let LangReader = {
         console.log('Load Prog Text : OK');
     },
 
-    step : function(){
-        this.readCurrentCommand();
-    },
 
-    //vrati kordinate trenutne naredbe
+    //vrati kordinate trenutne naredbe,i naredbu
     readCurrentCommand : function(){
         let tmp_cmd = new CommandHolder(
             this.content[this.progTextMatrixCrnt.z][this.progTextMatrixCrnt.y][this.progTextMatrixCrnt.x],
@@ -303,8 +312,64 @@ let LangReader = {
     },
 
 
+    //pomakne program za jedan korak
+    step : function(){
+        if(this.direction == 'RUP') this.progTextMatrixCrnt.y += 1;
+        else if(this.direction == 'RDW') this.progTextMatrixCrnt.y -= 1;
+        else if(this.direction == 'RLF') this.progTextMatrixCrnt.x += 1;
+        else if(this.direction == 'RRT') this.progTextMatrixCrnt.x -= 1;
+        else if(this.direction == 'PUP') this.progTextMatrixCrnt.z += 1;
+        else if(this.direction == 'PDW') this.progTextMatrixCrnt.z -= 1;
+        else if(this.direction == 'STOP') console.log('Stop');
+    },
+
+
+    //evaluira naredbu
     evalCommand : function(command){
-        // if(command == 'NOP') ;
+        //ostalo
+        if(command == 'NOP') nopCntr++;
+        else if(command == 'STO') this.direction == 'STOP';
+        else if(command == 'STP') this.direction == 'STOP';
+        
+        //direction
+        else if(command == 'RUP') this.direction == 'RUP';
+        else if(command == 'RDW') this.direction == 'RDW';
+        else if(command == 'RLF') this.direction == 'RLF';
+        else if(command == 'RRT') this.direction == 'RRT';
+        else if(command == 'PUP') this.direction == 'PUP';
+        else if(command == 'PDW') this.direction == 'PDW';
+        else if(command == 'PDW') this.direction == 'PDW';
+
+        //memory
+        else if(command == 'CPA') return;
+        else if(command == 'CPB') return;
+        else if(command == 'SWP') return;
+        else if(command == 'NEA') return;
+        else if(command == 'PEA') return;
+        else if(command == 'NEB') return;
+        else if(command == 'PEB') return;
+
+
+        //flow control
+        else if(command == 'CAZ') return;
+        else if(command == 'CBZ') return;
+        else if(command == 'CAL') return;
+        else if(command == 'CBL') return;
+        else if(command == 'CIE') return;
+
+        //combination A
+        else if(command == 'REA') return;
+        else if(command == 'ADA') return;
+        else if(command == 'AOA') return;
+        else if(command == 'SBA') return;
+        else if(command == 'SOA') return;
+
+        //combination B
+        else if(command == 'REB') return;
+        else if(command == 'ADB') return;
+        else if(command == 'AOB') return;
+        else if(command == 'SAB') return;
+        else if(command == 'SOB') return;
 
         console.load('Current Command : '+command);
     },
@@ -313,9 +378,6 @@ let LangReader = {
         this.content = [];
     },
 
-    // nextCommand : function(){
-
-    // }
 };
 
 
@@ -532,6 +594,8 @@ function initCanvas(){
 
 function animate() {
 
+    //resizeCanvasToDisplaySize();
+
     requestAnimationFrame(animate);
 
     camera.lookAt(cameraTarget); 
@@ -579,7 +643,7 @@ function resizeCanvasToDisplaySize() {
     const height = canvas.clientHeight;
 
     // adjust displayBuffer size to match
-    if (canvas.width !== width || canvas.height !== height) {
+    if (renderer.width !== width || renderer.height !== height) {
         // you must pass false here or three.js sadly fights the browser
         renderer.setSize(width, height, false);
         camera.aspect = width / height;
@@ -717,8 +781,11 @@ let progControlHTML = document.querySelector('.prog-control');
 let progCntrlToggleVisHTML = document.getElementById('prog-control-btn-toggle-visibility');
 
 //HEADER
-let headerShowSidebarHTML = document.getElementById('header-show-sidebar');
 let headerMainHTML = document.getElementById('header-main');
+
+//buttons
+let headerShowSidebarHTML = document.getElementById('header-show-sidebar');
+
 
 
 
@@ -876,3 +943,32 @@ visMenuFontSize.addEventListener('change',function(){
     console.log('DisplayControler.textDirection  :', DisplayControler.CurrentFont.size );
     SHOULD_TEXT_MATRIX_BE_LOADED = true;
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -14,6 +14,9 @@
     
     <title>3Dof Visualizer</title>
 
+    <script src="js/main.js" type="module" ></script>
+
+
 </head>
 
 <body class="bg-dark">
@@ -27,7 +30,7 @@
             <a href="#" class="btn hide-all p-1 txt-font-size-medium txt-light mx-2 visibility-no" id="header-hide-all">Hide All</a>
 
             <div class="container-flex">
-            <a href="#" class="btn overlay-open-about p-1 txt-font-size-medium txt-light">About</a>
+            <a href="#" class="btn overlay-open-about p-1 txt-font-size-medium txt-light" id="header-about">About</a>
 
             <div class="header-logo mx-5">
                 <h1 class="txt-font-size-large txt-light"><span class="txt-font-size-Xlarge">3</span>Dof</h1>
@@ -58,7 +61,7 @@
             </div>
 
             <div class="vis-menu-content fill-parent ">
-                <!-- <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur qui animi accusantium perferendis minus odit officia quae velit corporis placeat ratione esse rerum vero eos, eaque, aliquam ullam harum expedita.</p> -->
+               
                 <textarea name="" id="vis-text-input" cols="30" rows="10" class="fill-parent hide" ></textarea>
 
                 <div id="vis-settings" class="fill-parent bg-primary container-flex-center hide">
@@ -103,15 +106,21 @@
         </div>
     </div>
 
-
-    <!-- <p style="color:red; position: absolute; top: 10px; width: 100%; text-align: center; z-index: 150; display:block; ">TESTING</p> -->
+    <!-- Overlay -->
+    <section class="overlay hide">
+        <div class="overlay-content container-flex-center">
+            <div class="overlay-header txt-font-editor2">About & Commands</div>
+            <div class="overlay-tables container-flex txt-font-editor2 txt-font-size-normal py-2"></div>
+            <div class="overlay-footer"> <p class=" txt-font-size-medium m-3">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis quas suscipit illo, unde repellat reiciendis dolor aut aliquid error eligendi.</p></div>
+        </div>
+    </section>
 
 
     <!-- JS -->
 
-    <script src="js/main.js" type="module" ></script>
-    <script src="js/lang_reader-test.js" type="module" ></script>
-
+    <script src="js/overlay.js"></script>
+    
+    <!-- <script src="js/lang_reader-test.js" type="module" ></script> -->
     <!-- <script src="js/visualizer-clean.js" type="module" ></script> -->
 
 

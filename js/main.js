@@ -6,6 +6,8 @@ import { OrbitControls } from '../node_modules/three/examples/jsm/controls/Orbit
 
 let controls;
 
+let progStop = false;
+
 // Bitno za nesto
 THREE.Cache.enabled = true;
 
@@ -87,8 +89,8 @@ class MasterController{
         this.previousCommand = undefined;
         this.currentCommand = undefined;
 
-        this.TextDisplay = undefined;
-        this.LangReader  = undefined;
+        this.TextDisplay = new TextDisplayController();
+        this.LangReader = new LangReader();
 
         this.group = new THREE.Group();
 
@@ -452,7 +454,7 @@ class LangReader {
         if(this.direction == 'RLF') this.progTextMatrixCrnt.x -= this.incrVal;
         if(this.direction == 'PUP') this.progTextMatrixCrnt.z += this.incrVal;
         if(this.direction == 'PDW') this.progTextMatrixCrnt.z -= this.incrVal;
-        if(this.direction == 'STOP') console.log('Stop');
+        if(this.direction == 'STOP') progStop = true;
         this.incrVal = 1;
     };
 
@@ -799,6 +801,10 @@ function animate() {
         ProgMaster.Init(tmpArrPrg);
 
         console.log('Init OK');
+
+        delay = 1000;
+        speed = 1;
+        autoPlay = false;
     }
 
 
@@ -1084,11 +1090,47 @@ function ToggleVisAll() {
 //     console.log('Test2 :');
 // });
 
+let delay = 1000;
+let speed = 1;
+let autoPlay = false;
+// let autoPlayInterval = setInterval(autoPlayFunction,(delay/speed));
+let autoPlayInterval;
+
+function autoPlayFunction(){
+    ProgMaster.step();
+    // if(autoPlay) setTimeout(autoPlayFunction, delay/speed);
+    clearInterval(autoPlayInterval);
+    if(!progStop && autoPlay) autoPlayInterval = setInterval(autoPlayFunction,delay);
+}
+
+// setTimeout(autoPlayFunction, delay/speed);
+
+//play
+progCntrlPlayHTML.addEventListener('click',TogglePlay);
+
+//pause
+progCntrlPauseHTML.addEventListener('click',TogglePlay);
+
+function TogglePlay(){ if(!progStop) autoPlay = !autoPlay; if(!progStop && autoPlay) autoPlayFunction();};
+
+
+//speed
+progCntrlSpeedHTML.addEventListener('click',ToggleSpeed);
+
+function ToggleSpeed(){
+    speed++;
+    if(speed == 4) speed = 1;
+    if(speed == 1) delay = 1000;
+    if(speed == 2) delay = 500;
+    if(speed == 3) delay = 100;
+    progCntrlSpeedHTML.innerHTML = `Speed ${speed}X`;
+}
+
 
 //step
 progCntrlStepHTML.addEventListener('click',NextStep);
 
-function NextStep(){ ProgMaster.step(); }
+function NextStep(){ if(!progStop) ProgMaster.step(); }
 
 // Load
 let progCntrlLoad = document.getElementById('prog-control-btn-load');

@@ -6,7 +6,7 @@ import { OrbitControls } from '../node_modules/three/examples/jsm/controls/Orbit
 
 let controls;
 
-let progStop = false;
+
 
 // Bitno za nesto
 THREE.Cache.enabled = true;
@@ -454,7 +454,7 @@ class LangReader {
         if(this.direction == 'RLF') this.progTextMatrixCrnt.x -= this.incrVal;
         if(this.direction == 'PUP') this.progTextMatrixCrnt.z += this.incrVal;
         if(this.direction == 'PDW') this.progTextMatrixCrnt.z -= this.incrVal;
-        if(this.direction == 'STOP') progStop = true;
+        if(this.direction == 'STOP') PROGRAM_STOP = true;
         this.incrVal = 1;
     };
 
@@ -556,7 +556,12 @@ class LangReader {
 
 
 let terminalControler = {
+    
     terminalHTML : document.querySelector('.terminal'),
+    inputId : "terminal-input-num-",
+    inputIdCounter : 0,
+    inputContent : [0],
+    WAITING_FOR_INPUT : false,
 
     output : function(data){
         this.terminalHTML.innerHTML += `<p class="txt-font-editor-2" style="color:#fff; font-size:4rem;">${data}</p>`;
@@ -565,7 +570,68 @@ let terminalControler = {
 
     input : function(){
 
-    }
+        this.inputIdCounter++;
+        this.WAITING_FOR_INPUT = true;
+
+        this.terminalHTML.innerHTML += `<input type="text" id="${this.makeInputId()}" class="txt-font-editor-2" style="background-color:#000; color:#fff; font-size:4rem;" placeholder="Input">`;
+        this.terminalHTML.scrollTop = this.terminalHTML.scrollHeight;  
+
+
+
+        document.querySelector(`#${this.makeInputId()}`).addEventListener('keypress',this.inputHandler);
+
+
+
+        // return this.inputAsync().then(function(){console.log("GOTOVO");});
+
+
+    },
+
+    inputHandler : function(key){
+        if(key.code === "Enter"){
+            terminalControler.WAITING_FOR_INPUT = false;
+            terminalControler.removeInputHandler();
+            terminalControler.setTextFromInputField();
+            terminalControler.replaceInputWithText();
+            console.log(terminalControler.getLastInput());
+       }
+    },
+
+    // inputAsync : async function(){
+    //     let resp = await new Promise(resolve => {
+    //         setTimeout(() => {
+    //             if(terminalControler.WAITING_FOR_INPUT == false) {
+    //                 this.removeInputHandler();
+    //                 this.setTextFromInputField();
+    //                 this.replaceInputWithText();
+    //                 resolve(21);
+    //             }
+    //             resolve(20);
+    //         },2000);});
+    //     if(resp != 20 ) return resp;
+    //     else return this.inputAsync();
+    // },
+
+    removeInputHandler : function(){
+        document.querySelector(`#${terminalControler.makeInputId()}`).removeEventListener('keypress',terminalControler.inputHandler);
+        // return terminalControler.getTextFromInputField;
+    },
+
+    getTextFromInputField : function(){ return document.querySelector(`#${this.makeInputId()}`).value; },
+
+    setTextFromInputField : function(){ this.inputContent.push(Number(this.getTextFromInputField())); },
+
+    makeInputId : function(){ return `${this.inputId}${this.inputIdCounter}`; }, //makes the input id from inputID and its number
+
+    getLastInput : function(){ return this.inputContent[this.inputIdCounter]; },
+
+    replaceInputWithText : function(){
+        let txtElHTML = document.createElement('p');
+        let inputElHTML = document.querySelector(`#${this.makeInputId()}`);
+        
+        txtElHTML.innerHTML = `<span class="txt-font-editor-2" style="background-color:#000; color:#00f; font-size:4rem;" > ${this.getLastInput()} </span>`;
+        this.terminalHTML.replaceChild(txtElHTML,inputElHTML);
+    },
 };
 
 
@@ -662,12 +728,11 @@ let progTextArea = {
     /////////////////
     // Global Vars //
     /////////////////
-
-
-
+    
 //moze se ucitat tek kad se font ucita
 let CAN_TEXT_MATRIX_BE_LOADED = false;
 let SHOULD_TEXT_MATRIX_BE_LOADED = false;
+let PROGRAM_STOP = false;
 
 // Rendering Vars
 
@@ -681,7 +746,7 @@ let camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHei
 // CAMERA
 
 let cameraTarget = new THREE.Vector3(0, 150, 0);
-camera.position.set(0, 400, 700);
+camera.position.set(0, 700, 700);
 
 
 // Scene Setup
@@ -709,7 +774,7 @@ scene.add(pointLight);
 let tst_geometry = new THREE.BoxGeometry(20,20,20);
 let tst_material = new THREE.MeshBasicMaterial({ color: 0xf0ff0f });
 let tst_cube = new THREE.Mesh(tst_geometry, tst_material);
-scene.add(tst_cube);
+// scene.add(tst_cube);
 /////////////////////////
 
 
@@ -732,8 +797,6 @@ let TextMaterialNames = [
 ///////////////////////////
 ///////////////////////////
 
-// let DisplayControler = new TextDisplayController();
-// let LangReaderController = new LangReader();
 
 let ProgMaster = new MasterController();
 
@@ -741,6 +804,15 @@ SHOULD_TEXT_MATRIX_BE_LOADED = true;
 
 initCanvas();
 
+
+// let prms = terminalControler.input();
+// console.log(prms);
+
+terminalControler.input();
+
+// console.log('inTxt :', inTxt);
+
+// console.log(terminalControler.input());
 
 // Looped
 animate();
@@ -764,9 +836,7 @@ function initCanvas(){
 
     controls = new OrbitControls( camera, renderer.domElement );
 
-	//controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
-
-    controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+    controls.enableDamping = true; 
 	controls.dampingFactor = 0.05;
 
 	controls.screenSpacePanning = false;
@@ -787,6 +857,10 @@ function animate() {
     requestAnimationFrame(animate);
 
     camera.lookAt(cameraTarget); 
+
+
+    // if(inTxt.promise.done) console.log('inTxt :', inTxt);
+    // if(inTxt.state > "pending") console.log('inTxt :', inTxt);
 
     // font se ucitao pa se inita text 
     if(ProgMaster.DisplaySettings.CurrentFont.fontLoaded == true && CAN_TEXT_MATRIX_BE_LOADED == false) CAN_TEXT_MATRIX_BE_LOADED = true;
@@ -816,6 +890,8 @@ function animate() {
 }
 
 
+// RESIZE
+
 //OK
 window.addEventListener( 'resize', resizeCanvasToDisplaySize, false );
 
@@ -828,39 +904,7 @@ function resizeCanvasToDisplaySize() {
     camera.updateProjectionMatrix();
   }
 
-// AUTO RESIZE CANVAS
-// TODO on resize call
-// function resizeCanvasToDisplaySize() {
-//     // look up the size the canvas is being displayed
 
-//     const canvas = document.getElementById("Visualizer-O-Matic-9000");
-//     const width = canvas.clientWidth;
-//     const height = canvas.clientHeight;
-
-//     // adjust displayBuffer size to match
-//     if (renderer.width !== width || renderer.height !== height) {
-//         // you must pass false here or three.js sadly fights the browser
-//         renderer.setSize(width, height, false);
-//         camera.aspect = width / height;
-//         camera.updateProjectionMatrix();
-//     }
-// }
-
-
-// window.addEventListener( 'resize', onWindowResize, false );
-
-// function onWindowResize(){
-
-//     let canvas = document.getElementById("Visualizer-O-Matic-9000");
-//     let width  = canvas.width;
-//     let height = canvas.height;
-
-//     camera.aspect = width / height;
-//     camera.updateProjectionMatrix();
-
-//     renderer.setSize(width, height,false);
-
-// }
 
 //OK - ucita font , sam obi trebalo promijeniti font path ako treba
 function loadFont(passedFontObject) {
@@ -886,7 +930,7 @@ function loadFont(passedFontObject) {
 }
 
 
-//Old
+//
 function makeTextMesh(FontObject,TextString,x,y,z,MaterialObject){
     
     //Create Geometry
@@ -1082,11 +1126,13 @@ function ToggleVisAll() {
 
 
 // progControlHTML.addEventListener('mouseenter',function(){
-//     if(visMenuHTML.classList.contains('hide')) progControlHTML.classList.remove('visibility-no');
+//     // if(visMenuHTML.classList.contains('hide')) progControlHTML.classList.remove('visibility-no');
+//     progControlHTML.classList.remove('move-to-back');
 //     console.log('Test :');
 // });
 // progControlHTML.addEventListener('mouseleave',function(){
-//     if(visMenuHTML.classList.contains('hide')) progControlHTML.classList.add('visibility-no');
+//     // if(visMenuHTML.classList.contains('hide')) progControlHTML.classList.add('visibility-no');
+//     progControlHTML.classList.add('move-to-back');
 //     console.log('Test2 :');
 // });
 
@@ -1100,7 +1146,7 @@ function autoPlayFunction(){
     ProgMaster.step();
     // if(autoPlay) setTimeout(autoPlayFunction, delay/speed);
     clearInterval(autoPlayInterval);
-    if(!progStop && autoPlay) autoPlayInterval = setInterval(autoPlayFunction,delay);
+    if(!PROGRAM_STOP && autoPlay) autoPlayInterval = setInterval(autoPlayFunction,delay);
 }
 
 // setTimeout(autoPlayFunction, delay/speed);
@@ -1111,7 +1157,11 @@ progCntrlPlayHTML.addEventListener('click',TogglePlay);
 //pause
 progCntrlPauseHTML.addEventListener('click',TogglePlay);
 
-function TogglePlay(){ if(!progStop) autoPlay = !autoPlay; if(!progStop && autoPlay) autoPlayFunction();};
+function TogglePlay(){ 
+    if(!PROGRAM_STOP) autoPlay = !autoPlay; 
+    if(!PROGRAM_STOP && autoPlay) autoPlayFunction();
+    if(PROGRAM_STOP && autoPlay) SHOULD_TEXT_MATRIX_BE_LOADED = true;
+};
 
 
 //speed
@@ -1130,7 +1180,7 @@ function ToggleSpeed(){
 //step
 progCntrlStepHTML.addEventListener('click',NextStep);
 
-function NextStep(){ if(!progStop) ProgMaster.step(); }
+function NextStep(){ if(!PROGRAM_STOP) ProgMaster.step(); }
 
 // Load
 let progCntrlLoad = document.getElementById('prog-control-btn-load');
@@ -1145,10 +1195,6 @@ function LoadProgFromTextArea(){
 ////////    Side (Vis) Menu     /////////
 /////////////////////////////////////////
 
-
-// let visMenuBtnTextHTML = document.getElementById('vis-menu-btn-text');
-// let visMenuBtnSettingsHTML = document.getElementById('vis-menu-btn-settings');
-// let visMenuBtnDisplayHTML = document.getElementById('vis-menu-btn-display');
 
 visMenuBtnTextHTML.addEventListener('click',ToggleVisText);
 visMenuBtnSettingsHTML.addEventListener('click',ToggleVisSettings);

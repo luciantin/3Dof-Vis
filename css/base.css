@@ -230,3 +230,6 @@ a { text-decoration: none;}
 
 .visibility-no{ visibility: hidden !important;}
 .visibility-yes{ visibility: visible !important;}
+
+.move-to-back{ z-index: -100 !important;}
+.move-to-front{ z-index: 100 !important;}

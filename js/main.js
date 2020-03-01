@@ -578,6 +578,13 @@ let terminalControler = {
     WAITING_FOR_INPUT : false,
     GOT_INPUT : false,
 
+    clear : function(){
+        this.inputIdCounter = 0;
+        this.inputContent = [0];
+        this.WAITING_FOR_INPUT = false;
+        this.GOT_INPUT = false;
+    },
+
     output : function(data){
         this.terminalHTML.innerHTML += `<p class="txt-font-editor-2" style="color:#fff; font-size:4rem;">${data}</p>`;
         this.terminalHTML.scrollTop = this.terminalHTML.scrollHeight;
@@ -873,6 +880,9 @@ function animate() {
     if(CAN_TEXT_MATRIX_BE_LOADED && SHOULD_TEXT_MATRIX_BE_LOADED){
         
         SHOULD_TEXT_MATRIX_BE_LOADED = false; //jer je ucitana
+        PROGRAM_STOP = false;
+
+        terminalControler.clear();
         
         Compiler.loadProgText(progTextArea.load().textContent);
         let tmpArrPrg = Compiler.CreateArrayFromProgramText();
@@ -882,9 +892,11 @@ function animate() {
 
         console.log('Init OK');
 
-        delay = 1000;
-        speed = 1;
+        // delay = 1000;
+        // speed = 1;
         autoPlay = false;
+
+        clearInterval(autoPlayInterval);
     }
 
 
@@ -1088,14 +1100,16 @@ progCntrlToggleVisHTML.addEventListener('click',ToggleVisAll);
 function ToggleMenuVisibility() { 
     visMenuHTML.classList.toggle("hide"); 
     headerShowSidebarHTML.classList.toggle("visibility-no");     
+    resizeCanvasToDisplaySize();
 }
 
 
 //progControlHTML
-function ToggleVisAll() { 
+function ToggleVisAll() {
 
+    
     if(!headerMainHTML.classList.contains('hide')){
-
+        
         // progControlHTML.classList.add('visibility-no');
 
         progCntrlToggleVisHTML.innerHTML = "Show All";
@@ -1109,12 +1123,13 @@ function ToggleVisAll() {
         // progControlHTML.classList.remove('visibility-no');
 
         progCntrlToggleVisHTML.innerHTML = "Hide All";
-
+        
         headerMainHTML.classList.remove("hide"); 
         visMenuHTML.classList.remove("hide"); 
         headerShowSidebarHTML.classList.add("visibility-no"); 
     }   
-
+    
+    resizeCanvasToDisplaySize(); 
 }
 
 

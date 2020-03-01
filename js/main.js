@@ -140,14 +140,25 @@ class MasterController{
     step(){
         this.currentCommand = this.LangReader.readCurrentCommand();
 
-        this.LangReader.evalCommand(this.currentCommand.value);
-        this.LangReader.step();
+
+
+        this.TextDisplay.setMaterial(this.previousCommand, TextMaterials[1]);
+        this.TextDisplay.setMaterial(this.currentCommand, TextMaterials[0]);
+
+        if(this.currentCommand.value == 'IIA' || this.currentCommand.value == 'IIB'){
+            if(terminalControler.WAITING_FOR_INPUT == false && terminalControler.canTakeInput() == false){ 
+                terminalControler.inputIdCounter++;
+                terminalControler.input();
+            }
+            if(terminalControler.canTakeInput() == false) return;
+        }
+
 
         // console.log(this.currentCommand);
         // console.log(this.previousCommand);
 
-        this.TextDisplay.setMaterial(this.previousCommand, TextMaterials[1]);
-        this.TextDisplay.setMaterial(this.currentCommand, TextMaterials[0]);
+        this.LangReader.evalCommand(this.currentCommand.value);
+        this.LangReader.step();
 
         this.previousCommand = this.currentCommand;        
     }
@@ -383,8 +394,8 @@ class LangReader {
                 this.setB(tmp);
             },
             
-            setA : function(num){ this.Memory[this.pntr[0]] = num; console.log("testtest A");},
-            setB : function(num){ this.Memory[this.pntr[1]] = num; console.log("testtest B");},
+            setA : function(num){ this.Memory[this.pntr[0]] = num; },
+            setB : function(num){ this.Memory[this.pntr[1]] = num; },
             setC : function(num){ this.Memory[this.pntr[2]] = num; },
             
             getA : function(){ return this.Memory[this.pntr[0]]; },
@@ -400,8 +411,8 @@ class LangReader {
             decrC : function(){ this.resizeMem(2,'decr'); },
 
             logMemory : function(){
-                console.log('this.progMemory :', this.Memory);
-                console.log('pntr > ',this.pntr);
+                // console.log('this.progMemory :', this.Memory);
+                // console.log('pntr > ',this.pntr);
             },
             
         };
@@ -487,7 +498,7 @@ class LangReader {
 
         //flow control
         if(command == 'CAZ') if(this.progMemory.getA() != 0) this.incrVal = 2;
-        if(command == 'CBZ') {if(this.progMemory.getB() != 0) this.incrVal = 2; console.log( ' B != 0 TRUE');}
+        if(command == 'CBZ') {if(this.progMemory.getB() != 0) this.incrVal = 2;}
         if(command == 'CAL') if(this.progMemory.getA() <  this.progMemory.getB()) this.incrVal = 2;
         if(command == 'CBL') if(this.progMemory.getB() <  this.progMemory.getA()) this.incrVal = 2;
         if(command == 'CIE') if(this.progMemory.getA() != this.progMemory.getB()) this.incrVal = 2;
@@ -509,24 +520,27 @@ class LangReader {
         //I/O
         if(command == 'OIA') terminalControler.output(this.progMemory.getA());
         if(command == 'OIB') terminalControler.output(this.progMemory.getB());
-        if(command == 'IIA') this.progMemory.setA(10);
-        if(command == 'IIB') this.progMemory.setB(10);
+        if(command == 'IIA') this.progMemory.setA(Number(terminalControler.takeInput()));
+        // if(command == 'IIA') console.log(Number(terminalControler.takeInput()));
+        if(command == 'IIB') this.progMemory.setB(Number(terminalControler.takeInput()));
+        // if(command == 'IIB') console.log(Number(terminalControler.takeInput()));
         if(command == 'OAA') return;
         if(command == 'OAB') return;
 
-        console.log('-----------------------------------------------------------');
+        // console.log('-----------------------------------------------------------');
         // if(command == 'IIA') console.log('command IIA');
         // else if(command == 'IIB') console.log('command IIB');
         // console.log('Current Command = '+command);
         // console.log('Current Direction : ' + this.direction);
-        this.progMemory.logMemory();
+        // this.progMemory.logMemory();
         // this.progMemory.Memory[this.progMemory.pntr[0]] = 10;
         // this.progMemory.Memory[this.progMemory.pntr[1]] = 10;
         // console.log(this.progMemory.Memory[this.progMemory.pntr[0]] );
-        console.log('A : ' + this.progMemory.getA() );
-        console.log('B : ' + this.progMemory.getB() );
-        console.log('Incr : '+this.incrVal );
+        // console.log('A : ' + this.progMemory.getA() );
+        // console.log('B : ' + this.progMemory.getB() );
+        // console.log('Incr : '+this.incrVal );
         // this.progMemory.setA(20);
+        // console.log('-----------------------------------------------------------');
     };
 
     
@@ -562,6 +576,7 @@ let terminalControler = {
     inputIdCounter : 0,
     inputContent : [0],
     WAITING_FOR_INPUT : false,
+    GOT_INPUT : false,
 
     output : function(data){
         this.terminalHTML.innerHTML += `<p class="txt-font-editor-2" style="color:#fff; font-size:4rem;">${data}</p>`;
@@ -570,47 +585,38 @@ let terminalControler = {
 
     input : function(){
 
-        this.inputIdCounter++;
         this.WAITING_FOR_INPUT = true;
 
         this.terminalHTML.innerHTML += `<input type="text" id="${this.makeInputId()}" class="txt-font-editor-2" style="background-color:#000; color:#fff; font-size:4rem;" placeholder="Input">`;
         this.terminalHTML.scrollTop = this.terminalHTML.scrollHeight;  
 
-
-
         document.querySelector(`#${this.makeInputId()}`).addEventListener('keypress',this.inputHandler);
-
-
-
-        // return this.inputAsync().then(function(){console.log("GOTOVO");});
-
 
     },
 
     inputHandler : function(key){
         if(key.code === "Enter"){
-            terminalControler.WAITING_FOR_INPUT = false;
             terminalControler.removeInputHandler();
             terminalControler.setTextFromInputField();
             terminalControler.replaceInputWithText();
-            console.log(terminalControler.getLastInput());
+            // console.log(terminalControler.getLastInput());
+            terminalControler.GOT_INPUT = true;
+            terminalControler.WAITING_FOR_INPUT = false;
        }
     },
 
-    // inputAsync : async function(){
-    //     let resp = await new Promise(resolve => {
-    //         setTimeout(() => {
-    //             if(terminalControler.WAITING_FOR_INPUT == false) {
-    //                 this.removeInputHandler();
-    //                 this.setTextFromInputField();
-    //                 this.replaceInputWithText();
-    //                 resolve(21);
-    //             }
-    //             resolve(20);
-    //         },2000);});
-    //     if(resp != 20 ) return resp;
-    //     else return this.inputAsync();
-    // },
+    canTakeInput : function(){
+        return this.GOT_INPUT;
+    },
+
+    takeInput : function(){
+        this.GOT_INPUT = false;
+        let sd = terminalControler.getLastInput();
+        // console.log('this.inputContent :', this.inputContent);
+        // console.log('sd :', sd);
+        // console.log('this.inputIdCounter :', this.inputIdCounter);
+        return sd;
+    },
 
     removeInputHandler : function(){
         document.querySelector(`#${terminalControler.makeInputId()}`).removeEventListener('keypress',terminalControler.inputHandler);
@@ -808,7 +814,7 @@ initCanvas();
 // let prms = terminalControler.input();
 // console.log(prms);
 
-terminalControler.input();
+// terminalControler.input();
 
 // console.log('inTxt :', inTxt);
 

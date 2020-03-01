@@ -749,6 +749,9 @@ let CAN_TEXT_MATRIX_BE_LOADED = false;
 let SHOULD_TEXT_MATRIX_BE_LOADED = false;
 let PROGRAM_STOP = false;
 
+SHOULD_TEXT_MATRIX_BE_LOADED = true;
+
+
 // Rendering Vars
 
 let scene = new THREE.Scene();
@@ -815,7 +818,6 @@ let TextMaterialNames = [
 
 let ProgMaster = new MasterController();
 
-SHOULD_TEXT_MATRIX_BE_LOADED = true;
 
 initCanvas();
 
@@ -937,11 +939,11 @@ function loadFont(passedFontObject) {
     // Kad ucita 
     function (response) {    
         passedFontObject.font = response;
-    },// onProgress callback
-	function ( xhr ) {
-        // console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
         console.log('Load Font : OK');
         passedFontObject.fontLoaded = true;
+    },// onProgress callback
+	function ( xhr ) {
+        console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
 	},
 	// onError callback
 	function ( err ) {

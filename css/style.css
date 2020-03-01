@@ -35,13 +35,13 @@ body{
 
 
 #content .visualizer-container {
-    flex: 3;
+    flex: 5;
 }
 
 #content .visualizer-menu{
     display: flex;
     flex-direction: column;
-    flex: 1;
+    flex: 2;
     overflow: hidden;
 }
 
@@ -68,7 +68,7 @@ body{
 }
 
 .vis-menu-content{
-    flex: 10;
+    flex: 16;
 }
 
 textarea {
@@ -92,7 +92,7 @@ textarea {
 }
 
 .terminal-input{
-    flex: 10;
+    flex: 16;
 }
 
 .terminal{

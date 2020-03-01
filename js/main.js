@@ -60,11 +60,12 @@ visMenuTextArea.value = progText;
 
 
 class MasterController{
-
-
+    
+    
     constructor(){
-
-
+        
+        loadFont(this.DisplaySettings.CurrentFont);
+        
         this.DisplaySettings = {
             meshId : 1,
             textDirection : 3,
@@ -95,7 +96,6 @@ class MasterController{
         this.group = new THREE.Group();
 
         // loadFont(this.TextDisplay.CurrentFont);
-        loadFont(this.DisplaySettings.CurrentFont);
         loadHtmlMenu(this.DisplaySettings);
     }
 

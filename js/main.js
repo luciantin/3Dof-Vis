@@ -64,7 +64,7 @@ class MasterController{
     
     constructor(){
         
-        loadFont(this.DisplaySettings.CurrentFont);
+        
         
         this.DisplaySettings = {
             meshId : 1,
@@ -86,6 +86,8 @@ class MasterController{
                 fontMap: [ "helvetiker","optimer","gentilis","droid/droid_sans","droid/droid_serif"]
             }
         };
+
+        loadFont(this.DisplaySettings.CurrentFont);
 
         this.previousCommand = undefined;
         this.currentCommand = undefined;
